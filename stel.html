@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stel — Long-Term Stock Evaluation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#14181c;
+    --paper:#eee8d8;
+    --paper-dim:#e2dac5;
+    --line:#c9bfa0;
+    --emerald:#3f7a5f;
+    --emerald-bright:#4f9c78;
+    --amber:#b8863a;
+    --rust:#a6493a;
+    --muted:#6b6455;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--emerald);color:var(--ink);}
+
+  a{color:inherit;}
+
+  /* ---- Header ---- */
+  header{
+    padding:2.4rem 1.4rem 1.6rem;
+    border-bottom:1px solid #2a3138;
+    position:sticky;
+    top:0;
+    background:var(--ink);
+    z-index:20;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--emerald-bright);
+    margin-bottom:0.5rem;
+  }
+  h1{
+    font-family:'Source Serif 4',serif;
+    font-weight:700;
+    font-size:1.9rem;
+    line-height:1.15;
+    margin:0 0 0.4rem;
+    letter-spacing:-0.01em;
+  }
+  .subhead{
+    color:#9aa3ab;
+    font-size:0.92rem;
+    line-height:1.5;
+    max-width:38rem;
+  }
+
+  /* ---- Ticker bar ---- */
+  .ticker-bar{
+    margin-top:1.2rem;
+    display:flex;
+    gap:0.5rem;
+    align-items:center;
+  }
+  .ticker-bar input{
+    flex:1;
+    background:#1c2228;
+    border:1px solid #333c44;
+    color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.95rem;
+    padding:0.7rem 0.8rem;
+    border-radius:3px;
+    letter-spacing:0.03em;
+  }
+  .ticker-bar input::placeholder{color:#5c6670;}
+  .ticker-bar input:focus{outline:none;border-color:var(--emerald-bright);}
+  .ticker-bar button{
+    background:transparent;
+    border:1px solid #3d4750;
+    color:#9aa3ab;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    padding:0.7rem 0.9rem;
+    border-radius:3px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .ticker-bar button:hover{border-color:var(--rust);color:var(--rust);}
+
+  /* ---- Progress ---- */
+  .progress-wrap{margin-top:1rem;}
+  .progress-track{
+    height:6px;
+    background:#232a30;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--emerald),var(--emerald-bright));
+    width:0%;
+    transition:width 0.35s ease;
+  }
+  .progress-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    color:#7c8790;
+    margin-top:0.4rem;
+    display:flex;
+    justify-content:space-between;
+  }
+  .verdict{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+  }
+
+  /* ---- Section nav ---- */
+  nav.jump{
+    display:flex;
+    gap:0.4rem;
+    overflow-x:auto;
+    padding:1rem 1.4rem;
+    background:#191f24;
+    border-bottom:1px solid #2a3138;
+    position:sticky;
+    top:0;
+    z-index:19;
+    scrollbar-width:none;
+  }
+  nav.jump::-webkit-scrollbar{display:none;}
+  nav.jump a{
+    flex:0 0 auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem;
+    color:#8b9399;
+    text-decoration:none;
+    padding:0.35rem 0.7rem;
+    border:1px solid #2f373e;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  nav.jump a.done{color:var(--emerald-bright);border-color:#2e4a3c;}
+
+  /* ---- Main ---- */
+  main{max-width:38rem;margin:0 auto;padding:1.6rem 1.4rem 4rem;}
+
+  .order-card{
+    background:#1a2127;
+    border:1px solid #2a3138;
+    border-radius:6px;
+    padding:1.1rem 1.2rem;
+    margin-bottom:2rem;
+    font-size:0.85rem;
+    color:#a9b1b8;
+    line-height:1.6;
+  }
+  .order-card b{color:var(--paper);}
+
+  section.metric-section{
+    margin-bottom:1.4rem;
+    border:1px solid #2a3138;
+    border-radius:6px;
+    overflow:hidden;
+    background:#171d22;
+  }
+  .sec-head{
+    display:flex;
+    align-items:center;
+    gap:0.8rem;
+    padding:1rem 1.1rem;
+    cursor:pointer;
+    user-select:none;
+  }
+  .sec-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.95rem;
+    color:var(--emerald-bright);
+    width:1.6rem;
+    flex:0 0 auto;
+  }
+  .sec-title{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:1.08rem;
+    flex:1;
+  }
+  .sec-count{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem;
+    color:#6b7278;
+  }
+  .chevron{
+    color:#5c6670;
+    transition:transform 0.2s ease;
+    font-size:0.8rem;
+  }
+  section.open .chevron{transform:rotate(90deg);}
+
+  .sec-body{
+    display:none;
+    padding:0 1.1rem 1.1rem;
+  }
+  section.open .sec-body{display:block;}
+
+  .sec-desc{
+    font-size:0.85rem;
+    color:#8b939a;
+    margin:0 0 0.9rem;
+    line-height:1.55;
+    padding-bottom:0.9rem;
+    border-bottom:1px dashed #2a3138;
+  }
+
+  .metric-row{
+    display:flex;
+    gap:0.7rem;
+    align-items:flex-start;
+    padding:0.6rem 0;
+    border-bottom:1px solid #202730;
+  }
+  .metric-row:last-child{border-bottom:none;}
+  .metric-row input[type=checkbox]{
+    appearance:none;
+    width:1.15rem;
+    height:1.15rem;
+    flex:0 0 auto;
+    margin-top:0.15rem;
+    border:1px solid #4a545c;
+    border-radius:3px;
+    background:#1c2228;
+    cursor:pointer;
+    position:relative;
+  }
+  .metric-row input[type=checkbox]:checked{
+    background:var(--emerald);
+    border-color:var(--emerald-bright);
+  }
+  .metric-row input[type=checkbox]:checked::after{
+    content:'';
+    position:absolute;
+    left:4px;top:1px;
+    width:5px;height:9px;
+    border:solid var(--ink);
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .metric-text{flex:1;}
+  .metric-name{
+    font-weight:600;
+    font-size:0.92rem;
+    color:var(--paper);
+  }
+  .metric-name .thresh{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:400;
+    font-size:0.74rem;
+    color:var(--amber);
+    margin-left:0.4rem;
+  }
+  .metric-desc{
+    font-size:0.8rem;
+    color:#828b92;
+    margin-top:0.15rem;
+    line-height:1.5;
+  }
+  .metric-row.checked .metric-name{color:var(--emerald-bright);}
+  .metric-row.checked .metric-desc{color:#5c7268;}
+
+  .example-pair{
+    display:flex;
+    gap:0.6rem;
+    margin-top:0.5rem;
+    flex-wrap:wrap;
+  }
+  .example-chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem;
+    padding:0.25rem 0.55rem;
+    border-radius:3px;
+    line-height:1.4;
+  }
+  .example-chip.good{
+    background:#1a2521;
+    color:var(--emerald-bright);
+    border:1px solid #2e4a3c;
+  }
+  .example-chip.bad{
+    background:#241a18;
+    color:#c07364;
+    border:1px solid #4a302b;
+  }
+  .example-chip b{font-weight:600;}
+
+  .watchout{
+    margin-top:0.9rem;
+    padding:0.7rem 0.85rem;
+    background:#241b16;
+    border-left:2px solid var(--amber);
+    border-radius:3px;
+    font-size:0.8rem;
+    color:#cbb488;
+    line-height:1.55;
+  }
+  .watchout b{color:var(--amber);}
+
+  .gutcheck{
+    margin-top:2rem;
+    background:#1a2521;
+    border:1px solid #2e4a3c;
+    border-radius:6px;
+    padding:1.3rem 1.2rem;
+  }
+  .gutcheck h2{
+    font-family:'Source Serif 4',serif;
+    font-size:1.15rem;
+    margin:0 0 0.6rem;
+    color:var(--emerald-bright);
+  }
+  .gutcheck p{
+    font-size:0.86rem;
+    color:#9db3a5;
+    line-height:1.6;
+    margin:0;
+  }
+
+  footer{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    color:#4c545c;
+    padding:1.6rem;
+  }
+
+  /* ---- Export ---- */
+  .export-bar{
+    display:flex;
+    gap:0.6rem;
+    margin-top:2rem;
+  }
+  .export-btn{
+    flex:1;
+    background:#1a2127;
+    border:1px solid #2e3841;
+    color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    padding:0.8rem 0.6rem;
+    border-radius:5px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .export-btn:hover{border-color:var(--emerald-bright);color:var(--emerald-bright);}
+  .export-hint{
+    text-align:center;
+    font-size:0.72rem;
+    color:#5c6670;
+    margin-top:0.5rem;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  #printReport{display:none;}
+
+  @media print{
+    header, nav.jump, .order-card, #sections, .gutcheck, .export-bar, .export-hint, footer{display:none !important;}
+    body{background:#fff;color:#111;}
+    #printReport{
+      display:block;
+      font-family:'IBM Plex Mono',monospace;
+      padding:0;
+    }
+    #printReport h1{font-family:'Source Serif 4',serif;font-size:1.5rem;margin-bottom:0.1rem;}
+    #printReport .meta{font-size:0.8rem;color:#555;margin-bottom:1.2rem;}
+    #printReport .p-section{margin-bottom:1rem;page-break-inside:avoid;}
+    #printReport .p-section h3{font-size:0.95rem;margin:0 0 0.3rem;border-bottom:1px solid #ccc;padding-bottom:0.2rem;}
+    #printReport .p-item{font-size:0.82rem;margin:0.2rem 0;}
+    #printReport .p-item.pass::before{content:"✓ ";color:#2e7d55;}
+    #printReport .p-item.fail::before{content:"✗ ";color:#a6493a;}
+    #printReport .p-verdict{margin-top:1rem;font-size:1rem;font-weight:600;}
+  }
+
+  @media(min-width:640px){
+    h1{font-size:2.3rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Stel · Stock Evaluation Ledger</div>
+  <h1>Is this stock worth holding?</h1>
+  <div class="subhead">Work through each section in order. Check off what the stock passes — the ledger tracks your read as you go and saves per ticker.</div>
+
+  <div class="ticker-bar">
+    <input id="tickerInput" type="text" placeholder="Enter ticker or company name (e.g. TCS, AAPL)" autocomplete="off">
+    <button id="clearBtn">Clear</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label">
+      <span id="progressCount">0 / 0 checked</span>
+      <span class="verdict" id="verdictLabel"></span>
+    </div>
+  </div>
+</header>
+
+<nav class="jump" id="jumpNav"></nav>
+
+<main>
+
+  <div class="order-card">
+    <b>Order of operations —</b> screen valuation and growth first to see if it's even worth your time. Then stress-test financial health. If it survives, check profitability quality, moat, and management. Finish with the gut-check.
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="gutcheck">
+    <h2>Final gut-check</h2>
+    <p>Based on the fundamentals alone — not because you already like the stock — would you be comfortable holding this through a 40% drawdown? If yes, it's a reasonable long-term candidate. If you'd panic-sell on fundamentals alone, it's not a fit yet, regardless of how good the numbers look today.</p>
+  </div>
+
+  <div class="export-bar">
+    <button class="export-btn" id="downloadTxtBtn">Download .txt</button>
+    <button class="export-btn" id="printPdfBtn">Print / Save PDF</button>
+  </div>
+  <div class="export-hint">exports your current checklist state for this ticker</div>
+
+</main>
+
+<div id="printReport"></div>
+
+<footer>STEL · saved locally on this device, per ticker</footer>
+
+<script>
+const DATA = [
+  {
+    title: "Valuation",
+    desc: "Is the price reasonable for what you're getting? Always compare to industry peers, not the market average.",
+    items: [
+      {n:"P/E ratio", t:"vs. industry peers", d:"Price vs. earnings. A low P/E alone isn't 'cheap' — it can mean the market expects declining earnings.", good:"P/E 15–20, in line with or below peers averaging 25", bad:"P/E 60+ while peers sit at 20, with no unusual growth to justify it"},
+      {n:"PEG ratio", t:"< 1 attractive", d:"P/E adjusted for growth rate.", good:"P/E 18 ÷ 20% growth = PEG 0.9", bad:"P/E 40 ÷ 8% growth = PEG 5"},
+      {n:"P/B ratio", t:"asset-heavy names", d:"Price vs. book value — most relevant for banks, industrials.", good:"P/B 1.5–3 for a profitable industrial or bank", bad:"P/B 8+ with mediocre ROE, i.e. paying a huge premium over net assets for average returns"},
+      {n:"P/S ratio", t:"low/no-margin names", d:"Price vs. revenue — useful for early-growth companies.", good:"P/S 2–4 for a growing company with a credible path to profit", bad:"P/S 20+ with no profit and slowing revenue growth"},
+      {n:"EV/EBITDA", t:"vs. peers", d:"Better than P/E when comparing companies with different debt loads.", good:"EV/EBITDA 8–12, near sector average", bad:"EV/EBITDA 25+ while carrying heavy debt"}
+    ],
+    watch: "A low P/E isn't automatically cheap — pair valuation with the growth and quality checks below before drawing conclusions."
+  },
+  {
+    title: "Profitability",
+    desc: "Is the business actually good at making money? Look at the 5–10 year trend, not one year.",
+    items: [
+      {n:"Gross margin", t:"trend ↑", d:"Pricing power and cost control.", good:"Steady 45–55% or climbing over 5 years", bad:"Sliding from 40% to 25% over 5 years — competitors are eating margin"},
+      {n:"Operating margin", t:"trend ↑", d:"Efficiency of core operations.", good:"20%+ and stable or expanding", bad:"Under 5% and shrinking, or swinging wildly year to year"},
+      {n:"Net margin", t:"trend ↑", d:"Bottom-line profitability.", good:"15%+ and consistent across cycles", bad:"Near 0% or negative in more than one of the last 5 years"},
+      {n:"ROE", t:"consistently strong", d:"Return on Equity — profit per dollar of shareholder capital.", good:"15–25%, consistent (not from excess debt)", bad:"ROE looks like 30%+ only because of very high debt, not real efficiency"},
+      {n:"ROIC", t:"> cost of capital", d:"Return on Invested Capital — the most important one. Should sit consistently above the company's cost of capital.", good:"ROIC 15% vs. ~9% cost of capital — clearly value-creating", bad:"ROIC 6% vs. ~9% cost of capital — destroying value every year it operates"},
+      {n:"ROA", t:"vs. peers", d:"Return on Assets — efficiency of asset use.", good:"8%+ for an asset-light business, above peer average", bad:"Under 2%, well below peers with similar asset bases"}
+    ],
+    watch: "Expanding margins over a 5–10 year trend is a strong positive signal; a single good year proves little."
+  },
+  {
+    title: "Growth",
+    desc: "Is the business getting bigger, sustainably?",
+    items: [
+      {n:"Revenue CAGR", t:"3 / 5 / 10-yr", d:"Compound annual growth rate of revenue.", good:"12–18% CAGR over 5 years, fairly steady", bad:"One 40% spike year surrounded by flat or declining years"},
+      {n:"EPS growth", t:"should outpace revenue", d:"If EPS grows faster than revenue, it signals margin expansion or effective buybacks.", good:"Revenue +12%/yr, EPS +16%/yr — margins improving", bad:"Revenue +12%/yr, EPS +3%/yr — profitability eroding as it grows"},
+      {n:"Free cash flow growth", t:"", d:"Growth backed by real cash, not just accounting profit.", good:"FCF growing roughly in line with or faster than net income", bad:"Net income rising every year while FCF is flat or negative — profits aren't turning into cash"}
+    ],
+    watch: "Growth fueled by heavy debt or constant share dilution is lower quality than organic, self-funded growth."
+  },
+  {
+    title: "Financial Health",
+    desc: "Can the company survive a downturn? This is often the first real filter — a fragile balance sheet can sink an otherwise good business.",
+    items: [
+      {n:"Debt-to-equity", t:"low / manageable", d:"How leveraged the balance sheet is.", good:"D/E under 0.5, or under 1 for capital-intensive industries", bad:"D/E above 2 for a non-financial, non-utility company"},
+      {n:"Current / quick ratio", t:"> 1", d:"Short-term liquidity — ability to cover near-term obligations.", good:"Current ratio 1.5–2.5", bad:"Current ratio under 1 — can't cover short-term liabilities with short-term assets"},
+      {n:"Interest coverage", t:"comfortably high", d:"Operating income vs. interest expense. Low coverage = risk in a rate spike or earnings dip.", good:"Operating income covers interest expense 8x or more", bad:"Coverage under 2x — a bad quarter could mean missed interest payments"},
+      {n:"Free cash flow", t:"consistently positive", d:"Actual cash generated — harder to manipulate than EPS.", good:"Positive FCF in 4 of the last 5 years, growing", bad:"Negative FCF most years despite reported accounting profit"}
+    ],
+    watch: "If it fails here, dig deeper before moving on — this is the section most likely to disqualify a stock outright."
+  },
+  {
+    title: "Efficiency & Moat",
+    desc: "Does it have a durable edge? More qualitative, but often matters more than any single number.",
+    items: [
+      {n:"Asset turnover", t:"vs. peers", d:"Revenue generated per dollar of assets.", good:"At or above the peer-group average for that industry", bad:"Well below peers — assets are sitting idle relative to competitors"},
+      {n:"Competitive moat", t:"identifiable", d:"Brand strength, network effects, switching costs, patents/IP, cost advantages, regulatory barriers.", good:"A named, defensible edge you can point to (patent portfolio, dominant brand, high switching cost)", bad:"Product is a commodity — a competitor with capital could replicate it within a couple of years"},
+      {n:"Market share trend", t:"gaining or stable", d:"Is it gaining or losing ground to competitors?", good:"Share flat or rising over 3+ years", bad:"Share steadily declining as new entrants take customers"}
+    ],
+    watch: "Ask: could a well-funded competitor replicate this business in 5 years? If yes, today's good numbers may not last."
+  },
+  {
+    title: "Management & Ownership",
+    desc: "Are incentives aligned with you as a shareholder?",
+    items: [
+      {n:"Insider ownership %", t:"meaningful stake", d:"Skin in the game.", good:"Founders/execs hold 10%+ of shares outstanding", bad:"Under 1% insider ownership, management paid mostly in cash salary"},
+      {n:"Insider buying/selling", t:"buying > selling", d:"Buying is a stronger signal than selling, which can be routine (tax, diversification).", good:"Execs buying shares on the open market with their own money", bad:"Repeated large insider sales clustered right before or after weak results"},
+      {n:"Share count trend", t:"shrinking (buybacks)", d:"Buybacks shrink share count; dilution grows it — check which way it's trending.", good:"Share count flat or down 1–3%/yr from buybacks", bad:"Share count up 5–10%/yr from constant new stock issuance"},
+      {n:"Capital allocation record", t:"track record", d:"How management has historically deployed cash — reinvestment, M&A, buybacks, dividends — and whether it created value.", good:"Past acquisitions/reinvestment clearly grew earnings per share over time", bad:"History of overpaying for acquisitions that were later written down"}
+    ],
+    watch: ""
+  },
+  {
+    title: "Dividends",
+    desc: "Only relevant if income is part of your goal for this stock.",
+    items: [
+      {n:"Dividend yield", t:"sanity-checked", d:"A very high yield can signal distress, not opportunity — check why it's high.", good:"2–4% yield, backed by stable or growing earnings", bad:"9%+ yield that appeared suddenly because the stock price crashed"},
+      {n:"Payout ratio", t:"< 80%", d:"% of earnings paid out. Too high leaves little cushion for a bad year.", good:"30–60% payout, leaving room to reinvest and absorb a bad year", bad:"95%+ payout — almost nothing left if earnings dip"},
+      {n:"Dividend growth streak", t:"multi-year", d:"Consistent increases signal financial discipline.", good:"Raised the dividend in 7 of the last 10 years", bad:"Cut or frozen the dividend more than once in the last 5 years"}
+    ],
+    watch: ""
+  },
+  {
+    title: "Qualitative Context",
+    desc: "The story around the numbers.",
+    items: [
+      {n:"Industry tailwinds/headwinds", t:"", d:"Is the sector structurally growing or shrinking?", good:"Sector demand growing faster than GDP, structural not cyclical", bad:"Sector facing long-term structural decline (e.g. being disrupted by a newer technology)"},
+      {n:"Regulatory risk", t:"", d:"Exposure to policy or legal shifts.", good:"Stable regulatory environment, or regulation that favors incumbents", bad:"Business model depends on a subsidy, loophole, or rule that could change any budget cycle"},
+      {n:"Management quality", t:"", d:"Track record, communication honesty, incentive alignment with shareholders.", good:"Management sets realistic targets and consistently meets or beats them", bad:"Pattern of missed guidance, evasive answers on earnings calls, frequent CFO turnover"}
+    ],
+    watch: ""
+  }
+];
+
+const sectionsEl = document.getElementById('sections');
+const jumpNav = document.getElementById('jumpNav');
+let allCheckboxIds = [];
+
+DATA.forEach((sec, si) => {
+  const secId = 'sec-' + si;
+  const section = document.createElement('section');
+  section.className = 'metric-section';
+  section.id = secId;
+
+  const itemsHtml = sec.items.map((it, ii) => {
+    const cid = `chk-${si}-${ii}`;
+    allCheckboxIds.push(cid);
+    const examples = (it.good || it.bad) ? `
+          <div class="example-pair">
+            ${it.good ? `<span class="example-chip good"><b>Good —</b> ${it.good}</span>` : ''}
+            ${it.bad ? `<span class="example-chip bad"><b>Bad —</b> ${it.bad}</span>` : ''}
+          </div>` : '';
+    return `
+      <div class="metric-row" data-cid="${cid}">
+        <input type="checkbox" id="${cid}">
+        <label class="metric-text" for="${cid}">
+          <div class="metric-name">${it.n}${it.t ? `<span class="thresh">${it.t}</span>` : ''}</div>
+          <div class="metric-desc">${it.d}</div>
+          ${examples}
+        </label>
+      </div>`;
+  }).join('');
+
+  section.innerHTML = `
+    <div class="sec-head">
+      <span class="sec-num">${String(si+1).padStart(2,'0')}</span>
+      <span class="sec-title">${sec.title}</span>
+      <span class="sec-count" id="count-${si}">0/${sec.items.length}</span>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="sec-body">
+      <p class="sec-desc">${sec.desc}</p>
+      ${itemsHtml}
+      ${sec.watch ? `<div class="watchout"><b>Watch out —</b> ${sec.watch}</div>` : ''}
+    </div>
+  `;
+  sectionsEl.appendChild(section);
+
+  section.querySelector('.sec-head').addEventListener('click', () => {
+    section.classList.toggle('open');
+  });
+
+  const navLink = document.createElement('a');
+  navLink.href = '#' + secId;
+  navLink.textContent = sec.title;
+  navLink.id = 'nav-' + si;
+  jumpNav.appendChild(navLink);
+});
+
+// open first section by default
+document.getElementById('sec-0').classList.add('open');
+
+const tickerInput = document.getElementById('tickerInput');
+const clearBtn = document.getElementById('clearBtn');
+const progressFill = document.getElementById('progressFill');
+const progressCount = document.getElementById('progressCount');
+const verdictLabel = document.getElementById('verdictLabel');
+
+function storageKey(ticker){
+  return 'stel:' + (ticker || 'default').trim().toUpperCase();
+}
+
+function currentTicker(){
+  return tickerInput.value.trim() || 'default';
+}
+
+function saveState(){
+  const state = {};
+  allCheckboxIds.forEach(id => {
+    state[id] = document.getElementById(id).checked;
+  });
+  try{
+    localStorage.setItem(storageKey(currentTicker()), JSON.stringify(state));
+  }catch(e){}
+}
+
+function loadState(){
+  let state = {};
+  try{
+    const raw = localStorage.getItem(storageKey(currentTicker()));
+    if(raw) state = JSON.parse(raw);
+  }catch(e){}
+  allCheckboxIds.forEach(id => {
+    const cb = document.getElementById(id);
+    cb.checked = !!state[id];
+    updateRowStyle(cb);
+  });
+  updateAllCounts();
+}
+
+function updateRowStyle(cb){
+  const row = cb.closest('.metric-row');
+  row.classList.toggle('checked', cb.checked);
+}
+
+function updateAllCounts(){
+  let totalChecked = 0;
+  DATA.forEach((sec, si) => {
+    let c = 0;
+    sec.items.forEach((it, ii) => {
+      if(document.getElementById(`chk-${si}-${ii}`).checked) c++;
+    });
+    totalChecked += c;
+    document.getElementById(`count-${si}`).textContent = `${c}/${sec.items.length}`;
+    document.getElementById(`nav-${si}`).classList.toggle('done', c === sec.items.length && sec.items.length > 0);
+  });
+  const total = allCheckboxIds.length;
+  const pct = total ? Math.round((totalChecked/total)*100) : 0;
+  progressFill.style.width = pct + '%';
+  progressCount.textContent = `${totalChecked} / ${total} checked`;
+
+  if(pct === 0){
+    verdictLabel.textContent = '';
+  } else if(pct < 40){
+    verdictLabel.textContent = 'WEAK';
+    verdictLabel.style.color = '#a6493a';
+  } else if(pct < 70){
+    verdictLabel.textContent = 'MIXED';
+    verdictLabel.style.color = '#b8863a';
+  } else {
+    verdictLabel.textContent = 'STRONG';
+    verdictLabel.style.color = '#4f9c78';
+  }
+}
+
+sectionsEl.addEventListener('change', (e) => {
+  if(e.target.type === 'checkbox'){
+    updateRowStyle(e.target);
+    updateAllCounts();
+    saveState();
+  }
+});
+
+tickerInput.addEventListener('input', () => {
+  loadState();
+});
+
+clearBtn.addEventListener('click', () => {
+  allCheckboxIds.forEach(id => {
+    const cb = document.getElementById(id);
+    cb.checked = false;
+    updateRowStyle(cb);
+  });
+  updateAllCounts();
+  saveState();
+});
+
+loadState();
+
+// ---- Export ----
+function buildReport(){
+  const ticker = (tickerInput.value.trim() || 'UNSPECIFIED STOCK').toUpperCase();
+  const date = new Date().toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'});
+  let totalChecked = 0, total = 0;
+  const sectionsOut = DATA.map((sec, si) => {
+    const rows = sec.items.map((it, ii) => {
+      const checked = document.getElementById(`chk-${si}-${ii}`).checked;
+      total++;
+      if(checked) totalChecked++;
+      return {name: it.n, checked};
+    });
+    return {title: sec.title, rows};
+  });
+  const pct = total ? Math.round((totalChecked/total)*100) : 0;
+  let verdict = 'NOT ENOUGH DATA — no items checked yet';
+  if(totalChecked > 0){
+    if(pct < 40) verdict = `WEAK (${pct}%) — fails most checks, needs a strong specific reason to proceed`;
+    else if(pct < 70) verdict = `MIXED (${pct}%) — some real strengths, some real gaps, worth digging deeper before deciding`;
+    else verdict = `STRONG (${pct}%) — passes most checks across the board`;
+  }
+  return {ticker, date, sectionsOut, totalChecked, total, pct, verdict};
+}
+
+function reportToText(r){
+  let lines = [];
+  lines.push(`STOCK EVALUATION — ${r.ticker}`);
+  lines.push(`Date: ${r.date}`);
+  lines.push(`Score: ${r.totalChecked}/${r.total} checks passed (${r.pct}%)`);
+  lines.push(`Verdict: ${r.verdict}`);
+  lines.push('');
+  r.sectionsOut.forEach(sec => {
+    lines.push(`## ${sec.title}`);
+    sec.rows.forEach(row => {
+      lines.push(`  [${row.checked ? 'x' : ' '}] ${row.name}`);
+    });
+    lines.push('');
+  });
+  lines.push('Gut-check: would you hold this through a 40% drawdown, based on fundamentals alone?');
+  return lines.join('\n');
+}
+
+function reportToHtml(r){
+  let html = `<h1>${r.ticker}</h1><div class="meta">Evaluated ${r.date} · ${r.totalChecked}/${r.total} checks passed (${r.pct}%)</div>`;
+  r.sectionsOut.forEach(sec => {
+    html += `<div class="p-section"><h3>${sec.title}</h3>`;
+    sec.rows.forEach(row => {
+      html += `<div class="p-item ${row.checked ? 'pass' : 'fail'}">${row.name}</div>`;
+    });
+    html += `</div>`;
+  });
+  html += `<div class="p-verdict">Verdict: ${r.verdict}</div>`;
+  html += `<div class="p-item" style="margin-top:0.8rem;">Gut-check: would you hold this through a 40% drawdown, based on fundamentals alone?</div>`;
+  return html;
+}
+
+document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+  const r = buildReport();
+  const text = reportToText(r);
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${r.ticker.replace(/\s+/g,'_')}-evaluation.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('printPdfBtn').addEventListener('click', () => {
+  const r = buildReport();
+  document.getElementById('printReport').innerHTML = reportToHtml(r);
+  window.print();
+});
+</script>
+
+</body>
+</html>
