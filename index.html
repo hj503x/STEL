@@ -391,6 +391,65 @@
   @media(min-width:640px){
     h1{font-size:2.3rem;}
   }
+
+  /* ---- Desktop layout ---- */
+  @media(min-width:960px){
+    header{
+      margin-left:19rem;
+      padding:2.4rem 3rem 1.8rem;
+    }
+    .subhead{max-width:44rem;}
+    .ticker-bar{max-width:30rem;}
+
+    nav.jump{
+      position:fixed;
+      top:0;
+      left:0;
+      height:100vh;
+      width:16rem;
+      flex-direction:column;
+      align-items:flex-start;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:2.4rem 1.2rem;
+      border-bottom:none;
+      border-right:1px solid #2a3138;
+      gap:0.3rem;
+    }
+    nav.jump a{
+      width:100%;
+      border-radius:4px;
+      padding:0.55rem 0.8rem;
+    }
+    nav.jump a:hover{border-color:var(--emerald-bright);}
+
+    main{
+      max-width:54rem;
+      margin:0 0 0 19rem;
+      padding:2rem 3rem 5rem;
+    }
+    footer{margin-left:16rem;}
+    .example-pair{gap:0.8rem;}
+    .example-chip{font-size:0.76rem;}
+  }
+
+  @media(min-width:1240px){
+    main{max-width:66rem;}
+    .sec-body{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      column-gap:2.2rem;
+      align-items:start;
+    }
+    .sec-desc, .watchout{grid-column:1 / -1;}
+    .metric-row{padding:0.85rem 0;}
+  }
+
+  nav.jump a.active{
+    background:#1f2921;
+    border-color:var(--emerald-bright);
+    color:var(--paper);
+  }
 </style>
 </head>
 <body>
@@ -584,6 +643,9 @@ DATA.forEach((sec, si) => {
   navLink.href = '#' + secId;
   navLink.textContent = sec.title;
   navLink.id = 'nav-' + si;
+  navLink.addEventListener('click', () => {
+    section.classList.add('open');
+  });
   jumpNav.appendChild(navLink);
 });
 
@@ -686,6 +748,20 @@ clearBtn.addEventListener('click', () => {
 });
 
 loadState();
+
+// ---- Active section highlight in sidebar (desktop) ----
+const allSectionEls = DATA.map((_, si) => document.getElementById('sec-' + si));
+function updateActiveNav(){
+  let current = 0;
+  allSectionEls.forEach((el, i) => {
+    if(el.getBoundingClientRect().top - 140 <= 0) current = i;
+  });
+  allSectionEls.forEach((el, i) => {
+    document.getElementById('nav-' + i).classList.toggle('active', i === current);
+  });
+}
+window.addEventListener('scroll', updateActiveNav, {passive:true});
+updateActiveNav();
 
 // ---- Export ----
 function buildReport(){
