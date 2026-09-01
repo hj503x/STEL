@@ -1,4 +1,4 @@
-# STEL# Stel
+# Stel
 
 **Stel** (short for *Stock Evaluation Ledger*) is a single-page, offline-first
 checklist for evaluating a stock before committing to it long-term.
