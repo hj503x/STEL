@@ -5,18 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stel — Long-Term Stock Evaluation</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
   :root{
-    --ink:#14181c;
-    --paper:#eee8d8;
-    --paper-dim:#e2dac5;
-    --line:#c9bfa0;
+    --ink:#14161b;
+    --panel:#1a1d24;
+    --paper:#c7cbd3;
+    --paper-dim:#9aa0ab;
+    --line:#2a2f38;
+    --gold:#d8b26a;
     --emerald:#3f7a5f;
     --emerald-bright:#4f9c78;
-    --amber:#b8863a;
+    --amber:#d8b26a;
     --rust:#a6493a;
-    --muted:#6b6455;
+    --muted:#6b7280;
   }
 
   *{box-sizing:border-box;}
@@ -44,18 +46,18 @@
     transition:padding 0.3s cubic-bezier(0.4,0,0.2,1);
   }
   .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
     letter-spacing:0.18em;
     text-transform:uppercase;
-    color:var(--emerald-bright);
+    color:var(--gold);
     margin-bottom:0.5rem;
     transition:opacity 0.2s ease, margin 0.3s cubic-bezier(0.4,0,0.2,1), max-height 0.3s cubic-bezier(0.4,0,0.2,1);
     max-height:2rem;
     overflow:hidden;
   }
   h1{
-    font-family:'Source Serif 4',serif;
+    font-family:'JetBrains Mono',monospace;
     font-weight:700;
     font-size:1.9rem;
     line-height:1.15;
@@ -84,6 +86,36 @@
   header.compact .ticker-bar button{padding:0.45rem 0.8rem;}
   header.compact .progress-wrap{margin-top:0.4rem;}
 
+  .recent-tickers{
+    display:flex;
+    gap:0.4rem;
+    flex-wrap:wrap;
+    margin-top:0.55rem;
+    transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, margin 0.3s cubic-bezier(0.4,0,0.2,1);
+    max-height:3rem;
+    opacity:1;
+    overflow:hidden;
+  }
+  header.compact .recent-tickers{max-height:0;opacity:0;margin:0;}
+  .recent-tickers .rt-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    color:var(--muted);
+    align-self:center;
+    margin-right:0.1rem;
+  }
+  .recent-tickers button{
+    background:#20242c;
+    border:1px solid #2e343e;
+    color:var(--paper-dim);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    padding:0.3rem 0.6rem;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .recent-tickers button:hover{border-color:var(--gold);color:var(--gold);}
+
 
   /* ---- Ticker bar ---- */
   .ticker-bar{
@@ -95,10 +127,10 @@
   }
   .ticker-bar input{
     flex:1;
-    background:#1c2228;
+    background:var(--panel);
     border:1px solid #333c44;
     color:var(--paper);
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.95rem;
     padding:0.7rem 0.8rem;
     border-radius:3px;
@@ -106,12 +138,12 @@
     transition:padding 0.3s cubic-bezier(0.4,0,0.2,1);
   }
   .ticker-bar input::placeholder{color:#5c6670;}
-  .ticker-bar input:focus{outline:none;border-color:var(--emerald-bright);}
+  .ticker-bar input:focus{outline:none;border-color:var(--gold);}
   .ticker-bar button{
     background:transparent;
     border:1px solid #3d4750;
     color:#9aa3ab;
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.78rem;
     padding:0.7rem 0.9rem;
     border-radius:3px;
@@ -131,12 +163,12 @@
   }
   .progress-fill{
     height:100%;
-    background:linear-gradient(90deg,var(--emerald),var(--emerald-bright));
+    background:linear-gradient(90deg,var(--gold),#e8c98a);
     width:0%;
     transition:width 0.35s ease;
   }
   .progress-label{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
     color:#7c8790;
     margin-top:0.4rem;
@@ -144,7 +176,7 @@
     justify-content:space-between;
   }
   .verdict{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-weight:600;
   }
 
@@ -154,7 +186,7 @@
     gap:0.4rem;
     overflow-x:auto;
     padding:1rem 1.4rem;
-    background:#191f24;
+    background:var(--panel);
     border-bottom:1px solid #2a3138;
     position:sticky;
     top:0;
@@ -164,7 +196,7 @@
   nav.jump::-webkit-scrollbar{display:none;}
   nav.jump a{
     flex:0 0 auto;
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
     color:#8b9399;
     text-decoration:none;
@@ -179,7 +211,7 @@
   main{max-width:38rem;margin:0 auto;padding:1.6rem 1.4rem 4rem;}
 
   .order-card{
-    background:#1a2127;
+    background:var(--panel);
     border:1px solid #2a3138;
     border-radius:6px;
     padding:1.1rem 1.2rem;
@@ -195,7 +227,7 @@
     border:1px solid #2a3138;
     border-radius:6px;
     overflow:hidden;
-    background:#171d22;
+    background:var(--panel);
   }
   .sec-head{
     display:flex;
@@ -206,20 +238,20 @@
     user-select:none;
   }
   .sec-num{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.95rem;
-    color:var(--emerald-bright);
+    color:var(--gold);
     width:1.6rem;
     flex:0 0 auto;
   }
   .sec-title{
-    font-family:'Source Serif 4',serif;
+    font-family:'JetBrains Mono',monospace;
     font-weight:600;
     font-size:1.08rem;
     flex:1;
   }
   .sec-count{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
     color:#6b7278;
   }
@@ -261,13 +293,13 @@
     margin-top:0.15rem;
     border:1px solid #4a545c;
     border-radius:3px;
-    background:#1c2228;
+    background:var(--panel);
     cursor:pointer;
     position:relative;
   }
   .metric-row input[type=checkbox]:checked{
-    background:var(--emerald);
-    border-color:var(--emerald-bright);
+    background:var(--gold);
+    border-color:var(--gold);
   }
   .metric-row input[type=checkbox]:checked::after{
     content:'';
@@ -285,7 +317,7 @@
     color:var(--paper);
   }
   .metric-name .thresh{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-weight:400;
     font-size:0.74rem;
     color:var(--amber);
@@ -297,7 +329,7 @@
     margin-top:0.15rem;
     line-height:1.5;
   }
-  .metric-row.checked .metric-name{color:var(--emerald-bright);}
+  .metric-row.checked .metric-name{color:var(--gold);}
   .metric-row.checked .metric-desc{color:#5c7268;}
 
   .example-pair{
@@ -307,7 +339,7 @@
     flex-wrap:wrap;
   }
   .example-chip{
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
     padding:0.25rem 0.55rem;
     border-radius:3px;
@@ -339,27 +371,27 @@
 
   .gutcheck{
     margin-top:2rem;
-    background:#1a2521;
-    border:1px solid #2e4a3c;
+    background:#241f14;
+    border:1px solid #4a3f26;
     border-radius:6px;
     padding:1.3rem 1.2rem;
   }
   .gutcheck h2{
-    font-family:'Source Serif 4',serif;
+    font-family:'JetBrains Mono',monospace;
     font-size:1.15rem;
     margin:0 0 0.6rem;
-    color:var(--emerald-bright);
+    color:var(--gold);
   }
   .gutcheck p{
     font-size:0.86rem;
-    color:#9db3a5;
+    color:#c9bd9e;
     line-height:1.6;
     margin:0;
   }
 
   footer{
     text-align:center;
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
     color:#4c545c;
     padding:1.6rem;
@@ -370,39 +402,66 @@
     display:flex;
     gap:0.6rem;
     margin-top:2rem;
+    flex-wrap:wrap;
   }
   .export-btn{
-    flex:1;
-    background:#1a2127;
+    flex:1 1 8rem;
+    background:var(--panel);
     border:1px solid #2e3841;
     color:var(--paper);
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     font-size:0.78rem;
     padding:0.8rem 0.6rem;
     border-radius:5px;
     cursor:pointer;
     text-align:center;
   }
-  .export-btn:hover{border-color:var(--emerald-bright);color:var(--emerald-bright);}
+  .export-btn:hover{border-color:var(--gold);color:var(--gold);}
   .export-hint{
     text-align:center;
     font-size:0.72rem;
     color:#5c6670;
     margin-top:0.5rem;
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
   }
+
+  /* ---- Floating live-verdict badge ---- */
+  .float-badge{
+    position:fixed;
+    bottom:1.1rem;
+    right:1.1rem;
+    z-index:25;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:0.55rem 0.8rem;
+    display:flex;
+    align-items:center;
+    gap:0.55rem;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    box-shadow:0 4px 16px rgba(0,0,0,0.35);
+    opacity:0;
+    transform:translateY(0.4rem);
+    pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+  }
+  .float-badge.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
+  .float-badge #floatTicker{color:var(--gold);font-weight:600;}
+  .float-badge .float-score{color:var(--muted);}
+  .float-badge .float-verdict{font-weight:600;}
 
   #printReport{display:none;}
 
   @media print{
-    header, nav.jump, .order-card, #sections, .gutcheck, .export-bar, .export-hint, footer{display:none !important;}
+    header, nav.jump, .order-card, #sections, .gutcheck, .export-bar, .export-hint, .float-badge, footer{display:none !important;}
     body{background:#fff;color:#111;}
     #printReport{
       display:block;
-      font-family:'IBM Plex Mono',monospace;
+      font-family:'JetBrains Mono',monospace;
       padding:0;
     }
-    #printReport h1{font-family:'Source Serif 4',serif;font-size:1.5rem;margin-bottom:0.1rem;}
+    #printReport h1{font-family:'JetBrains Mono',monospace;font-size:1.5rem;margin-bottom:0.1rem;}
     #printReport .meta{font-size:0.8rem;color:#555;margin-bottom:1.2rem;}
     #printReport .p-section{margin-bottom:1rem;page-break-inside:avoid;}
     #printReport .p-section h3{font-size:0.95rem;margin:0 0 0.3rem;border-bottom:1px solid #ccc;padding-bottom:0.2rem;}
@@ -446,7 +505,7 @@
       border-radius:4px;
       padding:0.55rem 0.8rem;
     }
-    nav.jump a:hover{border-color:var(--emerald-bright);}
+    nav.jump a:hover{border-color:var(--gold);}
 
     main{
       max-width:54rem;
@@ -471,8 +530,8 @@
   }
 
   nav.jump a.active{
-    background:#1f2921;
-    border-color:var(--emerald-bright);
+    background:#241f14;
+    border-color:var(--gold);
     color:var(--paper);
   }
 </style>
@@ -488,6 +547,7 @@
     <input id="tickerInput" type="text" placeholder="Enter ticker or company name (e.g. TCS, AAPL)" autocomplete="off">
     <button id="clearBtn">Clear</button>
   </div>
+  <div class="recent-tickers" id="recentTickers"></div>
 
   <div class="progress-wrap">
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -514,14 +574,21 @@
   </div>
 
   <div class="export-bar">
+    <button class="export-btn" id="copyBtn">Copy summary</button>
     <button class="export-btn" id="downloadTxtBtn">Download .txt</button>
     <button class="export-btn" id="printPdfBtn">Print / Save PDF</button>
   </div>
-  <div class="export-hint">exports your current checklist state for this ticker</div>
+  <div class="export-hint" id="exportHint">exports your current checklist state for this ticker</div>
 
 </main>
 
 <div id="printReport"></div>
+
+<div class="float-badge" id="floatBadge">
+  <span id="floatTicker">—</span>
+  <span class="float-score" id="floatScore">0/0</span>
+  <span class="float-verdict" id="floatVerdict"></span>
+</div>
 
 <footer>STEL · saved locally on this device, per ticker</footer>
 
@@ -691,6 +758,34 @@ function currentTicker(){
   return tickerInput.value.trim() || 'default';
 }
 
+function getRecentTickers(){
+  try{ return JSON.parse(localStorage.getItem('stel:_recent') || '[]'); }
+  catch(e){ return []; }
+}
+
+function addRecentTicker(t){
+  if(!t || t === 'default') return;
+  let list = getRecentTickers().filter(x => x !== t);
+  list.unshift(t);
+  list = list.slice(0, 6);
+  try{ localStorage.setItem('stel:_recent', JSON.stringify(list)); }catch(e){}
+  renderRecentTickers();
+}
+
+function renderRecentTickers(){
+  const list = getRecentTickers();
+  const el = document.getElementById('recentTickers');
+  if(!list.length){ el.innerHTML = ''; return; }
+  el.innerHTML = '<span class="rt-label">Recent —</span>' +
+    list.map(t => `<button type="button" data-t="${t}">${t}</button>`).join('');
+  el.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tickerInput.value = btn.dataset.t;
+      loadState();
+    });
+  });
+}
+
 function saveState(){
   const state = {};
   allCheckboxIds.forEach(id => {
@@ -699,6 +794,7 @@ function saveState(){
   try{
     localStorage.setItem(storageKey(currentTicker()), JSON.stringify(state));
   }catch(e){}
+  addRecentTicker(currentTicker().toUpperCase());
 }
 
 function loadState(){
@@ -720,6 +816,13 @@ function updateRowStyle(cb){
   row.classList.toggle('checked', cb.checked);
 }
 
+function verdictForPct(pct){
+  if(pct === 0) return {label:'', color:''};
+  if(pct < 40) return {label:'WEAK', color:'#a6493a'};
+  if(pct < 70) return {label:'MIXED', color:'#d8b26a'};
+  return {label:'STRONG', color:'#4f9c78'};
+}
+
 function updateAllCounts(){
   let totalChecked = 0;
   DATA.forEach((sec, si) => {
@@ -728,7 +831,15 @@ function updateAllCounts(){
       if(document.getElementById(`chk-${si}-${ii}`).checked) c++;
     });
     totalChecked += c;
-    document.getElementById(`count-${si}`).textContent = `${c}/${sec.items.length}`;
+    const countEl = document.getElementById(`count-${si}`);
+    countEl.textContent = `${c}/${sec.items.length}`;
+    // section-level color cue
+    if(c === 0){
+      countEl.style.color = '';
+    } else {
+      const secPct = (c / sec.items.length) * 100;
+      countEl.style.color = verdictForPct(secPct).color || '#4f9c78';
+    }
     document.getElementById(`nav-${si}`).classList.toggle('done', c === sec.items.length && sec.items.length > 0);
   });
   const total = allCheckboxIds.length;
@@ -736,18 +847,18 @@ function updateAllCounts(){
   progressFill.style.width = pct + '%';
   progressCount.textContent = `${totalChecked} / ${total} checked`;
 
-  if(pct === 0){
-    verdictLabel.textContent = '';
-  } else if(pct < 40){
-    verdictLabel.textContent = 'WEAK';
-    verdictLabel.style.color = '#a6493a';
-  } else if(pct < 70){
-    verdictLabel.textContent = 'MIXED';
-    verdictLabel.style.color = '#b8863a';
-  } else {
-    verdictLabel.textContent = 'STRONG';
-    verdictLabel.style.color = '#4f9c78';
-  }
+  const v = verdictForPct(pct);
+  verdictLabel.textContent = v.label;
+  verdictLabel.style.color = v.color;
+
+  // floating badge
+  const ticker = (tickerInput.value.trim() || '—').toUpperCase();
+  document.getElementById('floatTicker').textContent = ticker;
+  document.getElementById('floatScore').textContent = `${totalChecked}/${total}`;
+  const floatVerdictEl = document.getElementById('floatVerdict');
+  floatVerdictEl.textContent = v.label;
+  floatVerdictEl.style.color = v.color;
+  updateFloatBadge();
 }
 
 sectionsEl.addEventListener('change', (e) => {
@@ -773,6 +884,7 @@ clearBtn.addEventListener('click', () => {
 });
 
 loadState();
+renderRecentTickers();
 
 // ---- Active section highlight + compact header on scroll (merged, rAF-throttled) ----
 const allSectionEls = DATA.map((_, si) => document.getElementById('sec-' + si));
@@ -798,9 +910,17 @@ function onScrollFrame(){
     headerEl.classList.remove('compact');
   }
   updateActiveNav();
+  updateFloatBadge();
   scrollTicking = false;
   clearTimeout(scrollSettleTimer);
   scrollSettleTimer = setTimeout(finalizeHeaderState, 150);
+}
+
+function updateFloatBadge(){
+  const total = allCheckboxIds.length;
+  let checked = 0;
+  allCheckboxIds.forEach(id => { if(document.getElementById(id).checked) checked++; });
+  document.getElementById('floatBadge').classList.toggle('visible', window.scrollY > 400 && checked > 0);
 }
 
 // Authoritative check once scrolling has actually stopped, so the header
@@ -874,6 +994,20 @@ function reportToHtml(r){
   html += `<div class="p-item" style="margin-top:0.8rem;">Gut-check: would you hold this through a 40% drawdown, based on fundamentals alone?</div>`;
   return html;
 }
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const r = buildReport();
+  const text = reportToText(r);
+  const hint = document.getElementById('exportHint');
+  try{
+    await navigator.clipboard.writeText(text);
+    const original = hint.textContent;
+    hint.textContent = 'Copied to clipboard ✓';
+    setTimeout(() => { hint.textContent = original; }, 1800);
+  }catch(e){
+    hint.textContent = 'Could not copy — try Download .txt instead';
+  }
+});
 
 document.getElementById('downloadTxtBtn').addEventListener('click', () => {
   const r = buildReport();
