@@ -85,6 +85,20 @@
   header.compact .ticker-bar input{padding:0.45rem 0.7rem;}
   header.compact .ticker-bar button{padding:0.45rem 0.8rem;}
   header.compact .progress-wrap{margin-top:0.4rem;}
+  header.compact .tier-breakdown{max-height:0;opacity:0;margin:0;}
+
+  .tier-breakdown{
+    display:flex;
+    gap:0.9rem;
+    margin-top:0.4rem;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.68rem;
+    color:var(--muted);
+    max-height:1.5rem;
+    opacity:1;
+    overflow:hidden;
+    transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, margin 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
 
   .recent-tickers{
     display:flex;
@@ -323,6 +337,59 @@
     color:var(--amber);
     margin-left:0.4rem;
   }
+  .tier-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:500;
+    font-size:0.62rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:0.1rem 0.4rem;
+    border-radius:3px;
+    margin-left:0.5rem;
+    vertical-align:middle;
+  }
+  .tier-badge.tier-core{background:#2e2016;color:#e0a85f;border:1px solid #4a3420;}
+  .tier-badge.tier-support{background:#1c2228;color:#7c8790;border:1px solid #2e343e;}
+  .tier-badge.tier-qual{background:#1a2028;color:#7a91b0;border:1px solid #2a3648;}
+
+  .calc-row{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-top:0.55rem;
+  }
+  .calc-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .calc-input{
+    width:5.2rem;
+    background:#1c2228;
+    border:1px solid #333c44;
+    color:var(--paper);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    padding:0.3rem 0.5rem;
+    border-radius:3px;
+  }
+  .calc-input:focus{outline:none;border-color:var(--gold);}
+  .calc-input.pass{border-color:#5fcf94;color:#5fcf94;background:#132420;font-weight:600;}
+  .calc-input.fail{border-color:#e2776b;color:#e2776b;background:#251715;font-weight:600;}
+  .calc-unit{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    color:var(--muted);
+  }
+  .calc-hint{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    font-weight:600;
+  }
+  .calc-hint.pass{color:#5fcf94;}
+  .calc-hint.fail{color:#e2776b;}
+
   .metric-desc{
     font-size:0.8rem;
     color:#828b92;
@@ -423,7 +490,10 @@
     color:#5c6670;
     margin-top:0.5rem;
     font-family:'JetBrains Mono',monospace;
+    transition:color 0.2s ease;
   }
+  .export-hint.pass{color:#5fcf94;font-weight:600;}
+  .export-hint.fail{color:#e2776b;font-weight:600;}
 
   /* ---- Floating live-verdict badge ---- */
   .float-badge{
@@ -519,7 +589,7 @@
 
   @media(min-width:1240px){
     main{max-width:66rem;}
-    .sec-body{
+    section.open .sec-body{
       display:grid;
       grid-template-columns:1fr 1fr;
       column-gap:2.2rem;
@@ -555,6 +625,7 @@
       <span id="progressCount">0 / 0 checked</span>
       <span class="verdict" id="verdictLabel"></span>
     </div>
+    <div class="tier-breakdown" id="tierBreakdown"></div>
   </div>
 </header>
 
@@ -598,11 +669,11 @@ const DATA = [
     title: "Valuation",
     desc: "Is the price reasonable for what you're getting? Always compare to industry peers, not the market average.",
     items: [
-      {n:"P/E ratio", t:"vs. industry peers", d:"Price vs. earnings. A low P/E alone isn't 'cheap' — it can mean the market expects declining earnings.", good:"P/E 15–20, in line with or below peers averaging 25", bad:"P/E 60+ while peers sit at 20, with no unusual growth to justify it"},
-      {n:"PEG ratio", t:"< 1 attractive", d:"P/E adjusted for growth rate.", good:"P/E 18 ÷ 20% growth = PEG 0.9", bad:"P/E 40 ÷ 8% growth = PEG 5"},
-      {n:"P/B ratio", t:"asset-heavy names", d:"Price vs. book value — most relevant for banks, industrials.", good:"P/B 1.5–3 for a profitable industrial or bank", bad:"P/B 8+ with mediocre ROE, i.e. paying a huge premium over net assets for average returns"},
-      {n:"P/S ratio", t:"low/no-margin names", d:"Price vs. revenue — useful for early-growth companies.", good:"P/S 2–4 for a growing company with a credible path to profit", bad:"P/S 20+ with no profit and slowing revenue growth"},
-      {n:"EV/EBITDA", t:"vs. peers", d:"Better than P/E when comparing companies with different debt loads.", good:"EV/EBITDA 8–12, near sector average", bad:"EV/EBITDA 25+ while carrying heavy debt"}
+      {n:"P/E ratio", t:"vs. industry peers", tier:"support", d:"Price vs. earnings. A low P/E alone isn't 'cheap' — it can mean the market expects declining earnings.", good:"P/E 15–20, in line with or below peers averaging 25", bad:"P/E 60+ while peers sit at 20, with no unusual growth to justify it", calc:{type:"max", value:25, unit:"x", label:"P/E"}},
+      {n:"PEG ratio", t:"< 1 attractive", tier:"support", d:"P/E adjusted for growth rate.", good:"P/E 18 ÷ 20% growth = PEG 0.9", bad:"P/E 40 ÷ 8% growth = PEG 5", calc:{type:"max", value:1, unit:"x", label:"PEG"}},
+      {n:"P/B ratio", t:"asset-heavy names", tier:"support", d:"Price vs. book value — most relevant for banks, industrials.", good:"P/B 1.5–3 for a profitable industrial or bank", bad:"P/B 8+ with mediocre ROE, i.e. paying a huge premium over net assets for average returns", calc:{type:"max", value:3, unit:"x", label:"P/B"}},
+      {n:"P/S ratio", t:"low/no-margin names", tier:"support", d:"Price vs. revenue — useful for early-growth companies.", good:"P/S 2–4 for a growing company with a credible path to profit", bad:"P/S 20+ with no profit and slowing revenue growth", calc:{type:"max", value:4, unit:"x", label:"P/S"}},
+      {n:"EV/EBITDA", t:"vs. peers", tier:"support", d:"Better than P/E when comparing companies with different debt loads.", good:"EV/EBITDA 8–12, near sector average", bad:"EV/EBITDA 25+ while carrying heavy debt", calc:{type:"max", value:12, unit:"x", label:"EV/EBITDA"}}
     ],
     watch: "A low P/E isn't automatically cheap — pair valuation with the growth and quality checks below before drawing conclusions."
   },
@@ -610,12 +681,12 @@ const DATA = [
     title: "Profitability",
     desc: "Is the business actually good at making money? Look at the 5–10 year trend, not one year.",
     items: [
-      {n:"Gross margin", t:"trend ↑", d:"Pricing power and cost control.", good:"Steady 45–55% or climbing over 5 years", bad:"Sliding from 40% to 25% over 5 years — competitors are eating margin"},
-      {n:"Operating margin", t:"trend ↑", d:"Efficiency of core operations.", good:"20%+ and stable or expanding", bad:"Under 5% and shrinking, or swinging wildly year to year"},
-      {n:"Net margin", t:"trend ↑", d:"Bottom-line profitability.", good:"15%+ and consistent across cycles", bad:"Near 0% or negative in more than one of the last 5 years"},
-      {n:"ROE", t:"consistently strong", d:"Return on Equity — profit per dollar of shareholder capital.", good:"15–25%, consistent (not from excess debt)", bad:"ROE looks like 30%+ only because of very high debt, not real efficiency"},
-      {n:"ROIC", t:"> cost of capital", d:"Return on Invested Capital — the most important one. Should sit consistently above the company's cost of capital.", good:"ROIC 15% vs. ~9% cost of capital — clearly value-creating", bad:"ROIC 6% vs. ~9% cost of capital — destroying value every year it operates"},
-      {n:"ROA", t:"vs. peers", d:"Return on Assets — efficiency of asset use.", good:"8%+ for an asset-light business, above peer average", bad:"Under 2%, well below peers with similar asset bases"}
+      {n:"Gross margin", t:"trend ↑", tier:"support", d:"Pricing power and cost control.", good:"Steady 45–55% or climbing over 5 years", bad:"Sliding from 40% to 25% over 5 years — competitors are eating margin", calc:{type:"min", value:45, unit:"%", label:"Gross margin"}},
+      {n:"Operating margin", t:"trend ↑", tier:"support", d:"Efficiency of core operations.", good:"20%+ and stable or expanding", bad:"Under 5% and shrinking, or swinging wildly year to year", calc:{type:"min", value:20, unit:"%", label:"Operating margin"}},
+      {n:"Net margin", t:"trend ↑", tier:"core", d:"Bottom-line profitability.", good:"15%+ and consistent across cycles", bad:"Near 0% or negative in more than one of the last 5 years", calc:{type:"min", value:15, unit:"%", label:"Net margin"}},
+      {n:"ROE", t:"consistently strong", tier:"core", d:"Return on Equity — profit per dollar of shareholder capital.", good:"15–25%, consistent (not from excess debt)", bad:"ROE looks like 30%+ only because of very high debt, not real efficiency", calc:{type:"min", value:15, unit:"%", label:"ROE"}},
+      {n:"ROIC", t:"> cost of capital", tier:"core", d:"Return on Invested Capital — the most important one. Should sit consistently above the company's cost of capital.", good:"ROIC 15% vs. ~9% cost of capital — clearly value-creating", bad:"ROIC 6% vs. ~9% cost of capital — destroying value every year it operates", calc:{type:"min", value:12, unit:"%", label:"ROIC"}},
+      {n:"ROA", t:"vs. peers", tier:"support", d:"Return on Assets — efficiency of asset use.", good:"8%+ for an asset-light business, above peer average", bad:"Under 2%, well below peers with similar asset bases", calc:{type:"min", value:8, unit:"%", label:"ROA"}}
     ],
     watch: "Expanding margins over a 5–10 year trend is a strong positive signal; a single good year proves little."
   },
@@ -623,9 +694,9 @@ const DATA = [
     title: "Growth",
     desc: "Is the business getting bigger, sustainably?",
     items: [
-      {n:"Revenue CAGR", t:"3 / 5 / 10-yr", d:"Compound annual growth rate of revenue.", good:"12–18% CAGR over 5 years, fairly steady", bad:"One 40% spike year surrounded by flat or declining years"},
-      {n:"EPS growth", t:"should outpace revenue", d:"If EPS grows faster than revenue, it signals margin expansion or effective buybacks.", good:"Revenue +12%/yr, EPS +16%/yr — margins improving", bad:"Revenue +12%/yr, EPS +3%/yr — profitability eroding as it grows"},
-      {n:"Free cash flow growth", t:"", d:"Growth backed by real cash, not just accounting profit.", good:"FCF growing roughly in line with or faster than net income", bad:"Net income rising every year while FCF is flat or negative — profits aren't turning into cash"}
+      {n:"Revenue CAGR", t:"3 / 5 / 10-yr", tier:"core", d:"Compound annual growth rate of revenue.", good:"12–18% CAGR over 5 years, fairly steady", bad:"One 40% spike year surrounded by flat or declining years", calc:{type:"min", value:12, unit:"%", label:"Revenue CAGR"}},
+      {n:"EPS growth", t:"should outpace revenue", tier:"support", d:"If EPS grows faster than revenue, it signals margin expansion or effective buybacks.", good:"Revenue +12%/yr, EPS +16%/yr — margins improving", bad:"Revenue +12%/yr, EPS +3%/yr — profitability eroding as it grows"},
+      {n:"Free cash flow growth", t:"", tier:"support", d:"Growth backed by real cash, not just accounting profit.", good:"FCF growing roughly in line with or faster than net income", bad:"Net income rising every year while FCF is flat or negative — profits aren't turning into cash"}
     ],
     watch: "Growth fueled by heavy debt or constant share dilution is lower quality than organic, self-funded growth."
   },
@@ -633,10 +704,10 @@ const DATA = [
     title: "Financial Health",
     desc: "Can the company survive a downturn? This is often the first real filter — a fragile balance sheet can sink an otherwise good business.",
     items: [
-      {n:"Debt-to-equity", t:"low / manageable", d:"How leveraged the balance sheet is.", good:"D/E under 0.5, or under 1 for capital-intensive industries", bad:"D/E above 2 for a non-financial, non-utility company"},
-      {n:"Current / quick ratio", t:"> 1", d:"Short-term liquidity — ability to cover near-term obligations.", good:"Current ratio 1.5–2.5", bad:"Current ratio under 1 — can't cover short-term liabilities with short-term assets"},
-      {n:"Interest coverage", t:"comfortably high", d:"Operating income vs. interest expense. Low coverage = risk in a rate spike or earnings dip.", good:"Operating income covers interest expense 8x or more", bad:"Coverage under 2x — a bad quarter could mean missed interest payments"},
-      {n:"Free cash flow", t:"consistently positive", d:"Actual cash generated — harder to manipulate than EPS.", good:"Positive FCF in 4 of the last 5 years, growing", bad:"Negative FCF most years despite reported accounting profit"}
+      {n:"Debt-to-equity", t:"low / manageable", tier:"core", d:"How leveraged the balance sheet is.", good:"D/E under 0.5, or under 1 for capital-intensive industries", bad:"D/E above 2 for a non-financial, non-utility company", calc:{type:"max", value:1, unit:"x", label:"D/E"}},
+      {n:"Current / quick ratio", t:"> 1", tier:"support", d:"Short-term liquidity — ability to cover near-term obligations.", good:"Current ratio 1.5–2.5", bad:"Current ratio under 1 — can't cover short-term liabilities with short-term assets", calc:{type:"min", value:1.5, unit:"x", label:"Current ratio"}},
+      {n:"Interest coverage", t:"comfortably high", tier:"core", d:"Operating income vs. interest expense. Low coverage = risk in a rate spike or earnings dip.", good:"Operating income covers interest expense 8x or more", bad:"Coverage under 2x — a bad quarter could mean missed interest payments", calc:{type:"min", value:8, unit:"x", label:"Interest coverage"}},
+      {n:"Free cash flow", t:"consistently positive", tier:"core", d:"Actual cash generated — harder to manipulate than EPS.", good:"Positive FCF in 4 of the last 5 years, growing", bad:"Negative FCF most years despite reported accounting profit"}
     ],
     watch: "If it fails here, dig deeper before moving on — this is the section most likely to disqualify a stock outright."
   },
@@ -644,9 +715,9 @@ const DATA = [
     title: "Efficiency & Moat",
     desc: "Does it have a durable edge? More qualitative, but often matters more than any single number.",
     items: [
-      {n:"Asset turnover", t:"vs. peers", d:"Revenue generated per dollar of assets.", good:"At or above the peer-group average for that industry", bad:"Well below peers — assets are sitting idle relative to competitors"},
-      {n:"Competitive moat", t:"identifiable", d:"Brand strength, network effects, switching costs, patents/IP, cost advantages, regulatory barriers.", good:"A named, defensible edge you can point to (patent portfolio, dominant brand, high switching cost)", bad:"Product is a commodity — a competitor with capital could replicate it within a couple of years"},
-      {n:"Market share trend", t:"gaining or stable", d:"Is it gaining or losing ground to competitors?", good:"Share flat or rising over 3+ years", bad:"Share steadily declining as new entrants take customers"}
+      {n:"Asset turnover", t:"vs. peers", tier:"support", d:"Revenue generated per dollar of assets.", good:"At or above the peer-group average for that industry", bad:"Well below peers — assets are sitting idle relative to competitors"},
+      {n:"Competitive moat", t:"identifiable", tier:"core", d:"Brand strength, network effects, switching costs, patents/IP, cost advantages, regulatory barriers.", good:"A named, defensible edge you can point to (patent portfolio, dominant brand, high switching cost)", bad:"Product is a commodity — a competitor with capital could replicate it within a couple of years"},
+      {n:"Market share trend", t:"gaining or stable", tier:"support", d:"Is it gaining or losing ground to competitors?", good:"Share flat or rising over 3+ years", bad:"Share steadily declining as new entrants take customers"}
     ],
     watch: "Ask: could a well-funded competitor replicate this business in 5 years? If yes, today's good numbers may not last."
   },
@@ -654,10 +725,10 @@ const DATA = [
     title: "Management & Ownership",
     desc: "Are incentives aligned with you as a shareholder?",
     items: [
-      {n:"Insider ownership %", t:"meaningful stake", d:"Skin in the game.", good:"Founders/execs hold 10%+ of shares outstanding", bad:"Under 1% insider ownership, management paid mostly in cash salary"},
-      {n:"Insider buying/selling", t:"buying > selling", d:"Buying is a stronger signal than selling, which can be routine (tax, diversification).", good:"Execs buying shares on the open market with their own money", bad:"Repeated large insider sales clustered right before or after weak results"},
-      {n:"Share count trend", t:"shrinking (buybacks)", d:"Buybacks shrink share count; dilution grows it — check which way it's trending.", good:"Share count flat or down 1–3%/yr from buybacks", bad:"Share count up 5–10%/yr from constant new stock issuance"},
-      {n:"Capital allocation record", t:"track record", d:"How management has historically deployed cash — reinvestment, M&A, buybacks, dividends — and whether it created value.", good:"Past acquisitions/reinvestment clearly grew earnings per share over time", bad:"History of overpaying for acquisitions that were later written down"}
+      {n:"Insider ownership %", t:"meaningful stake", tier:"support", d:"Skin in the game.", good:"Founders/execs hold 10%+ of shares outstanding", bad:"Under 1% insider ownership, management paid mostly in cash salary", calc:{type:"min", value:10, unit:"%", label:"Insider ownership"}},
+      {n:"Insider buying/selling", t:"buying > selling", tier:"support", d:"Buying is a stronger signal than selling, which can be routine (tax, diversification).", good:"Execs buying shares on the open market with their own money", bad:"Repeated large insider sales clustered right before or after weak results"},
+      {n:"Share count trend", t:"shrinking (buybacks)", tier:"support", d:"Buybacks shrink share count; dilution grows it — check which way it's trending.", good:"Share count flat or down 1–3%/yr from buybacks", bad:"Share count up 5–10%/yr from constant new stock issuance"},
+      {n:"Capital allocation record", t:"track record", tier:"core", d:"How management has historically deployed cash — reinvestment, M&A, buybacks, dividends — and whether it created value.", good:"Past acquisitions/reinvestment clearly grew earnings per share over time", bad:"History of overpaying for acquisitions that were later written down"}
     ],
     watch: ""
   },
@@ -665,9 +736,9 @@ const DATA = [
     title: "Dividends",
     desc: "Only relevant if income is part of your goal for this stock.",
     items: [
-      {n:"Dividend yield", t:"sanity-checked", d:"A very high yield can signal distress, not opportunity — check why it's high.", good:"2–4% yield, backed by stable or growing earnings", bad:"9%+ yield that appeared suddenly because the stock price crashed"},
-      {n:"Payout ratio", t:"< 80%", d:"% of earnings paid out. Too high leaves little cushion for a bad year.", good:"30–60% payout, leaving room to reinvest and absorb a bad year", bad:"95%+ payout — almost nothing left if earnings dip"},
-      {n:"Dividend growth streak", t:"multi-year", d:"Consistent increases signal financial discipline.", good:"Raised the dividend in 7 of the last 10 years", bad:"Cut or frozen the dividend more than once in the last 5 years"}
+      {n:"Dividend yield", t:"sanity-checked", tier:"support", d:"A very high yield can signal distress, not opportunity — check why it's high.", good:"2–4% yield, backed by stable or growing earnings", bad:"9%+ yield that appeared suddenly because the stock price crashed"},
+      {n:"Payout ratio", t:"< 80%", tier:"support", d:"% of earnings paid out. Too high leaves little cushion for a bad year.", good:"30–60% payout, leaving room to reinvest and absorb a bad year", bad:"95%+ payout — almost nothing left if earnings dip", calc:{type:"max", value:80, unit:"%", label:"Payout ratio"}},
+      {n:"Dividend growth streak", t:"multi-year", tier:"support", d:"Consistent increases signal financial discipline.", good:"Raised the dividend in 7 of the last 10 years", bad:"Cut or frozen the dividend more than once in the last 5 years", calc:{type:"min", value:5, unit:"yrs", label:"Growth streak"}}
     ],
     watch: ""
   },
@@ -675,17 +746,21 @@ const DATA = [
     title: "Qualitative Context",
     desc: "The story around the numbers.",
     items: [
-      {n:"Industry tailwinds/headwinds", t:"", d:"Is the sector structurally growing or shrinking?", good:"Sector demand growing faster than GDP, structural not cyclical", bad:"Sector facing long-term structural decline (e.g. being disrupted by a newer technology)"},
-      {n:"Regulatory risk", t:"", d:"Exposure to policy or legal shifts.", good:"Stable regulatory environment, or regulation that favors incumbents", bad:"Business model depends on a subsidy, loophole, or rule that could change any budget cycle"},
-      {n:"Management quality", t:"", d:"Track record, communication honesty, incentive alignment with shareholders.", good:"Management sets realistic targets and consistently meets or beats them", bad:"Pattern of missed guidance, evasive answers on earnings calls, frequent CFO turnover"}
+      {n:"Industry tailwinds/headwinds", t:"", tier:"qual", d:"Is the sector structurally growing or shrinking?", good:"Sector demand growing faster than GDP, structural not cyclical", bad:"Sector facing long-term structural decline (e.g. being disrupted by a newer technology)"},
+      {n:"Regulatory risk", t:"", tier:"qual", d:"Exposure to policy or legal shifts.", good:"Stable regulatory environment, or regulation that favors incumbents", bad:"Business model depends on a subsidy, loophole, or rule that could change any budget cycle"},
+      {n:"Management quality", t:"", tier:"qual", d:"Track record, communication honesty, incentive alignment with shareholders.", good:"Management sets realistic targets and consistently meets or beats them", bad:"Pattern of missed guidance, evasive answers on earnings calls, frequent CFO turnover"}
     ],
     watch: ""
   }
 ];
 
+const TIER_WEIGHT = {core:3, support:1, qual:1};
+const TIER_LABEL = {core:"Core", support:"Supporting", qual:"Qualitative"};
+
 const sectionsEl = document.getElementById('sections');
 const jumpNav = document.getElementById('jumpNav');
 let allCheckboxIds = [];
+let allCalcIds = [];
 
 DATA.forEach((sec, si) => {
   const secId = 'sec-' + si;
@@ -696,18 +771,29 @@ DATA.forEach((sec, si) => {
   const itemsHtml = sec.items.map((it, ii) => {
     const cid = `chk-${si}-${ii}`;
     allCheckboxIds.push(cid);
+    if(it.calc) allCalcIds.push(`calc-${si}-${ii}`);
     const examples = (it.good || it.bad) ? `
           <div class="example-pair">
             ${it.good ? `<span class="example-chip good"><b>Good —</b> ${it.good}</span>` : ''}
             ${it.bad ? `<span class="example-chip bad"><b>Bad —</b> ${it.bad}</span>` : ''}
           </div>` : '';
+    const tierClass = it.tier || 'support';
+    const tierBadge = `<span class="tier-badge tier-${tierClass}">${TIER_LABEL[tierClass]}</span>`;
+    const calcInput = it.calc ? `
+          <div class="calc-row">
+            <span class="calc-label">${it.calc.label}</span>
+            <input type="number" step="any" class="calc-input" id="calc-${si}-${ii}" placeholder="value" inputmode="decimal">
+            <span class="calc-unit">${it.calc.unit}</span>
+            <span class="calc-hint" id="calc-hint-${si}-${ii}"></span>
+          </div>` : '';
     return `
       <div class="metric-row" data-cid="${cid}">
         <input type="checkbox" id="${cid}">
         <label class="metric-text" for="${cid}">
-          <div class="metric-name">${it.n}${it.t ? `<span class="thresh">${it.t}</span>` : ''}</div>
+          <div class="metric-name">${it.n}${it.t ? `<span class="thresh">${it.t}</span>` : ''}${tierBadge}</div>
           <div class="metric-desc">${it.d}</div>
           ${examples}
+          ${calcInput}
         </label>
       </div>`;
   }).join('');
@@ -741,8 +827,74 @@ DATA.forEach((sec, si) => {
   jumpNav.appendChild(navLink);
 });
 
-// open first section by default
-document.getElementById('sec-0').classList.add('open');
+// Open first section by default on mobile; open all sections on desktop
+// where screen space isn't the constraint (matches the sidebar layout breakpoint).
+const desktopMQ = window.matchMedia('(min-width: 960px)');
+function applyDefaultOpenState(){
+  const allSections = DATA.map((_, si) => document.getElementById('sec-' + si));
+  if(desktopMQ.matches){
+    allSections.forEach(el => el.classList.add('open'));
+  } else {
+    allSections.forEach((el, i) => el.classList.toggle('open', i === 0));
+  }
+}
+applyDefaultOpenState();
+desktopMQ.addEventListener('change', applyDefaultOpenState);
+
+// ---- Calc-input wiring: live pass/fail from typed-in numbers ----
+function evalCalc(calc, value){
+  if(calc.type === 'min') return value >= calc.value;
+  return value <= calc.value; // 'max'
+}
+
+DATA.forEach((sec, si) => {
+  sec.items.forEach((it, ii) => {
+    if(!it.calc) return;
+    const input = document.getElementById(`calc-${si}-${ii}`);
+    const hint = document.getElementById(`calc-hint-${si}-${ii}`);
+    const cb = document.getElementById(`chk-${si}-${ii}`);
+    input.addEventListener('click', e => e.stopPropagation());
+    input.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        const idx = allCalcIds.indexOf(input.id);
+        const next = allCalcIds[idx + 1];
+        if(next){
+          const nextEl = document.getElementById(next);
+          nextEl.focus();
+          nextEl.select();
+          // make sure the section containing the next field is expanded and in view
+          nextEl.closest('.metric-section').classList.add('open');
+          nextEl.scrollIntoView({block:'center', behavior:'smooth'});
+        } else {
+          input.blur();
+        }
+      }
+    });
+    input.addEventListener('input', () => {
+      const raw = input.value.trim();
+      if(raw === ''){
+        input.classList.remove('pass','fail');
+        hint.textContent = '';
+        hint.classList.remove('pass','fail');
+        saveState();
+        return;
+      }
+      const num = parseFloat(raw);
+      if(isNaN(num)) return;
+      const passed = evalCalc(it.calc, num);
+      input.classList.toggle('pass', passed);
+      input.classList.toggle('fail', !passed);
+      hint.textContent = passed ? '✓ pass' : '✗ threshold missed';
+      hint.classList.toggle('pass', passed);
+      hint.classList.toggle('fail', !passed);
+      cb.checked = passed;
+      updateRowStyle(cb);
+      updateAllCounts();
+      saveState();
+    });
+  });
+});
 
 const tickerInput = document.getElementById('tickerInput');
 const clearBtn = document.getElementById('clearBtn');
@@ -791,22 +943,39 @@ function saveState(){
   allCheckboxIds.forEach(id => {
     state[id] = document.getElementById(id).checked;
   });
+  const values = {};
+  allCalcIds.forEach(id => {
+    const v = document.getElementById(id).value;
+    if(v !== '') values[id] = v;
+  });
   try{
-    localStorage.setItem(storageKey(currentTicker()), JSON.stringify(state));
+    localStorage.setItem(storageKey(currentTicker()), JSON.stringify({checks: state, values}));
   }catch(e){}
   addRecentTicker(currentTicker().toUpperCase());
 }
 
 function loadState(){
-  let state = {};
+  let saved = {};
   try{
     const raw = localStorage.getItem(storageKey(currentTicker()));
-    if(raw) state = JSON.parse(raw);
+    if(raw) saved = JSON.parse(raw);
   }catch(e){}
+  const state = saved.checks || saved || {}; // backward-compatible with old flat format
+  const values = saved.values || {};
   allCheckboxIds.forEach(id => {
     const cb = document.getElementById(id);
     cb.checked = !!state[id];
     updateRowStyle(cb);
+  });
+  allCalcIds.forEach(id => {
+    const input = document.getElementById(id);
+    const hint = document.getElementById('calc-hint-' + id.slice(5));
+    input.value = values[id] || '';
+    input.classList.remove('pass','fail');
+    if(hint){ hint.textContent=''; hint.classList.remove('pass','fail'); }
+    if(input.value !== ''){
+      input.dispatchEvent(new Event('input'));
+    }
   });
   updateAllCounts();
 }
@@ -825,15 +994,24 @@ function verdictForPct(pct){
 
 function updateAllCounts(){
   let totalChecked = 0;
+  const tierStats = {core:{checked:0,total:0}, support:{checked:0,total:0}, qual:{checked:0,total:0}};
+  let weightedScore = 0, weightedMax = 0;
+
   DATA.forEach((sec, si) => {
     let c = 0;
     sec.items.forEach((it, ii) => {
-      if(document.getElementById(`chk-${si}-${ii}`).checked) c++;
+      const tier = it.tier || 'support';
+      const weight = TIER_WEIGHT[tier];
+      const checked = document.getElementById(`chk-${si}-${ii}`).checked;
+      if(checked) c++;
+      tierStats[tier].total++;
+      if(checked) tierStats[tier].checked++;
+      weightedMax += weight;
+      if(checked) weightedScore += weight;
     });
     totalChecked += c;
     const countEl = document.getElementById(`count-${si}`);
     countEl.textContent = `${c}/${sec.items.length}`;
-    // section-level color cue
     if(c === 0){
       countEl.style.color = '';
     } else {
@@ -842,21 +1020,30 @@ function updateAllCounts(){
     }
     document.getElementById(`nav-${si}`).classList.toggle('done', c === sec.items.length && sec.items.length > 0);
   });
+
   const total = allCheckboxIds.length;
-  const pct = total ? Math.round((totalChecked/total)*100) : 0;
+  const pct = weightedMax ? Math.round((weightedScore/weightedMax)*100) : 0;
   progressFill.style.width = pct + '%';
   progressCount.textContent = `${totalChecked} / ${total} checked`;
 
   const v = verdictForPct(pct);
-  verdictLabel.textContent = v.label;
+  verdictLabel.textContent = v.label ? `${v.label} · ${pct}%` : '';
   verdictLabel.style.color = v.color;
+
+  const breakdownEl = document.getElementById('tierBreakdown');
+  if(breakdownEl){
+    breakdownEl.innerHTML = `
+      <span>${tierStats.core.checked}/${tierStats.core.total} core</span>
+      <span>${tierStats.support.checked}/${tierStats.support.total} supporting</span>
+      <span>${tierStats.qual.checked}/${tierStats.qual.total} qualitative</span>`;
+  }
 
   // floating badge
   const ticker = (tickerInput.value.trim() || '—').toUpperCase();
   document.getElementById('floatTicker').textContent = ticker;
   document.getElementById('floatScore').textContent = `${totalChecked}/${total}`;
   const floatVerdictEl = document.getElementById('floatVerdict');
-  floatVerdictEl.textContent = v.label;
+  floatVerdictEl.textContent = v.label ? `${v.label} ${pct}%` : '';
   floatVerdictEl.style.color = v.color;
   updateFloatBadge();
 }
@@ -943,37 +1130,49 @@ onScrollFrame();
 function buildReport(){
   const ticker = (tickerInput.value.trim() || 'UNSPECIFIED STOCK').toUpperCase();
   const date = new Date().toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'});
-  let totalChecked = 0, total = 0;
+  let totalChecked = 0, total = 0, weightedScore = 0, weightedMax = 0;
+  const tierStats = {core:{checked:0,total:0}, support:{checked:0,total:0}, qual:{checked:0,total:0}};
   const sectionsOut = DATA.map((sec, si) => {
     const rows = sec.items.map((it, ii) => {
       const checked = document.getElementById(`chk-${si}-${ii}`).checked;
+      const tier = it.tier || 'support';
+      const weight = TIER_WEIGHT[tier];
       total++;
-      if(checked) totalChecked++;
-      return {name: it.n, checked};
+      weightedMax += weight;
+      if(checked){ totalChecked++; weightedScore += weight; }
+      tierStats[tier].total++;
+      if(checked) tierStats[tier].checked++;
+      let valueNote = '';
+      if(it.calc){
+        const input = document.getElementById(`calc-${si}-${ii}`);
+        if(input && input.value !== '') valueNote = ` (entered: ${input.value}${it.calc.unit})`;
+      }
+      return {name: it.n, checked, tier, valueNote};
     });
     return {title: sec.title, rows};
   });
-  const pct = total ? Math.round((totalChecked/total)*100) : 0;
+  const pct = weightedMax ? Math.round((weightedScore/weightedMax)*100) : 0;
   let verdict = 'NOT ENOUGH DATA — no items checked yet';
   if(totalChecked > 0){
     if(pct < 40) verdict = `WEAK (${pct}%) — fails most checks, needs a strong specific reason to proceed`;
     else if(pct < 70) verdict = `MIXED (${pct}%) — some real strengths, some real gaps, worth digging deeper before deciding`;
     else verdict = `STRONG (${pct}%) — passes most checks across the board`;
   }
-  return {ticker, date, sectionsOut, totalChecked, total, pct, verdict};
+  return {ticker, date, sectionsOut, totalChecked, total, pct, verdict, tierStats};
 }
 
 function reportToText(r){
   let lines = [];
   lines.push(`STOCK EVALUATION — ${r.ticker}`);
   lines.push(`Date: ${r.date}`);
-  lines.push(`Score: ${r.totalChecked}/${r.total} checks passed (${r.pct}%)`);
+  lines.push(`Weighted score: ${r.pct}% (core checks count 3x)`);
+  lines.push(`Core: ${r.tierStats.core.checked}/${r.tierStats.core.total}  Supporting: ${r.tierStats.support.checked}/${r.tierStats.support.total}  Qualitative: ${r.tierStats.qual.checked}/${r.tierStats.qual.total}`);
   lines.push(`Verdict: ${r.verdict}`);
   lines.push('');
   r.sectionsOut.forEach(sec => {
     lines.push(`## ${sec.title}`);
     sec.rows.forEach(row => {
-      lines.push(`  [${row.checked ? 'x' : ' '}] ${row.name}`);
+      lines.push(`  [${row.checked ? 'x' : ' '}] (${row.tier}) ${row.name}${row.valueNote}`);
     });
     lines.push('');
   });
@@ -982,11 +1181,11 @@ function reportToText(r){
 }
 
 function reportToHtml(r){
-  let html = `<h1>${r.ticker}</h1><div class="meta">Evaluated ${r.date} · ${r.totalChecked}/${r.total} checks passed (${r.pct}%)</div>`;
+  let html = `<h1>${r.ticker}</h1><div class="meta">Evaluated ${r.date} · weighted score ${r.pct}% · core ${r.tierStats.core.checked}/${r.tierStats.core.total}, supporting ${r.tierStats.support.checked}/${r.tierStats.support.total}, qualitative ${r.tierStats.qual.checked}/${r.tierStats.qual.total}</div>`;
   r.sectionsOut.forEach(sec => {
     html += `<div class="p-section"><h3>${sec.title}</h3>`;
     sec.rows.forEach(row => {
-      html += `<div class="p-item ${row.checked ? 'pass' : 'fail'}">${row.name}</div>`;
+      html += `<div class="p-item ${row.checked ? 'pass' : 'fail'}">${row.name}${row.valueNote}</div>`;
     });
     html += `</div>`;
   });
@@ -1003,9 +1202,12 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
     await navigator.clipboard.writeText(text);
     const original = hint.textContent;
     hint.textContent = 'Copied to clipboard ✓';
-    setTimeout(() => { hint.textContent = original; }, 1800);
+    hint.classList.add('pass');
+    setTimeout(() => { hint.textContent = original; hint.classList.remove('pass'); }, 1800);
   }catch(e){
     hint.textContent = 'Could not copy — try Download .txt instead';
+    hint.classList.add('fail');
+    setTimeout(() => { hint.classList.remove('fail'); }, 2500);
   }
 });
 
