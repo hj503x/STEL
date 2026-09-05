@@ -10,16 +10,100 @@
   :root{
     --ink:#14161b;
     --panel:#1a1d24;
-    --paper:#c7cbd3;
-    --paper-dim:#9aa0ab;
+    --panel-alt:#1c2228;
+    --card-bg:#1c2128;
+    --card-border:#262d36;
+    --paper:#eef0f3;
+    --paper-dim:#c3c8d1;
     --line:#2a2f38;
+    --border-soft:#202730;
+    --track-bg:#232a30;
     --gold:#d8b26a;
+    --gold-soft:#e8c98a;
     --emerald:#3f7a5f;
     --emerald-bright:#4f9c78;
+    --emerald-vivid:#5fcf94;
     --amber:#d8b26a;
     --rust:#a6493a;
-    --muted:#6b7280;
+    --rust-vivid:#e2776b;
+    --muted:#9199a6;
+    --footer-text:#4c545c;
+    --input-bg:#1c2228;
+    --input-label-bg:rgba(255,255,255,0.02);
+    --input-focus-bg:rgba(216,178,106,0.06);
+    --good-bg:#1a2521;
+    --good-border:#2e4a3c;
+    --bad-bg:#241a18;
+    --bad-border:#4a302b;
+    --watch-bg:#241b16;
+    --watch-text:#dcd0ae;
+    --gutcheck-bg:#241f14;
+    --gutcheck-border:#4a3f26;
+    --gutcheck-text:#dcd0ae;
+    --nav-active-bg:#241f14;
+    --tier-core-bg:#2e2016;
+    --tier-core-text:#f0bd7c;
+    --tier-core-border:#4a3420;
+    --tier-support-bg:#1c2228;
+    --tier-support-text:#c3c8d1;
+    --tier-support-border:#2e343e;
+    --tier-qual-bg:#1a2028;
+    --tier-qual-text:#9db3d0;
+    --tier-qual-border:#2a3648;
+    --shadow:rgba(0,0,0,0.35);
+    --pass-pill-text:#0f1a16;
+    --fail-pill-text:#1f100e;
+    --calc-hint-bg-neutral:transparent;
   }
+
+  [data-theme="light"]{
+    --ink:#f6f2e7;
+    --panel:#ffffff;
+    --panel-alt:#f1ede0;
+    --card-bg:#fdfbf5;
+    --card-border:#e2dac3;
+    --paper:#26241c;
+    --paper-dim:#5b5748;
+    --line:#ddd5bd;
+    --border-soft:#e6dfc9;
+    --track-bg:#e6dfc9;
+    --gold:#a9762f;
+    --gold-soft:#8a5f22;
+    --emerald:#2f6f52;
+    --emerald-bright:#26744f;
+    --emerald-vivid:#1f8a5c;
+    --amber:#a9762f;
+    --rust:#a6493a;
+    --rust-vivid:#c14232;
+    --muted:#79735f;
+    --footer-text:#a39c85;
+    --input-bg:#fbf9f0;
+    --input-label-bg:rgba(0,0,0,0.03);
+    --input-focus-bg:rgba(169,118,47,0.08);
+    --good-bg:#eef6ef;
+    --good-border:#bcdcc4;
+    --bad-bg:#fbeeec;
+    --bad-border:#e9c3bc;
+    --watch-bg:#fbf1de;
+    --watch-text:#6b5326;
+    --gutcheck-bg:#fbf1de;
+    --gutcheck-border:#e8d4a4;
+    --gutcheck-text:#5c4a24;
+    --nav-active-bg:#f3e6c8;
+    --tier-core-bg:#f6e6cf;
+    --tier-core-text:#8a5f22;
+    --tier-core-border:#e3cd9e;
+    --tier-support-bg:#f1ede0;
+    --tier-support-text:#5b5748;
+    --tier-support-border:#e2dac3;
+    --tier-qual-bg:#e9eef5;
+    --tier-qual-text:#4a6488;
+    --tier-qual-border:#cdd9e8;
+    --shadow:rgba(60,50,30,0.18);
+    --pass-pill-text:#0f2c1c;
+    --fail-pill-text:#3a120c;
+  }
+
 
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;overflow-anchor:none;}
@@ -30,6 +114,12 @@
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
     overflow-anchor:none;
+    transition:background-color 0.25s ease, color 0.25s ease;
+  }
+  body, body *{
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
   }
   ::selection{background:var(--emerald);color:var(--ink);}
 
@@ -37,14 +127,37 @@
 
   /* ---- Header ---- */
   header{
-    padding:2.4rem 1.4rem 1.6rem;
-    border-bottom:1px solid #2a3138;
+    padding:2.4rem 3.6rem 1.6rem 1.4rem;
+    border-bottom:1px solid var(--line);
     position:sticky;
     top:0;
     background:var(--ink);
     z-index:20;
-    transition:padding 0.3s cubic-bezier(0.4,0,0.2,1);
+    transition:padding 0.3s cubic-bezier(0.4,0,0.2,1), background-color 0.25s ease;
   }
+  .theme-toggle{
+    position:absolute;
+    top:1.3rem;
+    right:1.3rem;
+    width:2.3rem;
+    height:2.3rem;
+    border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:21;
+    transition:border-color 0.2s ease, transform 0.2s ease;
+  }
+  .theme-toggle:hover{border-color:var(--gold);}
+  .theme-toggle:active{transform:scale(0.92);}
+  .theme-toggle svg{width:1.15rem;height:1.15rem;}
+  .theme-toggle .icon-moon{display:none;}
+  [data-theme="light"] .theme-toggle .icon-sun{display:none;}
+  [data-theme="light"] .theme-toggle .icon-moon{display:block;}
   .eyebrow{
     font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
@@ -66,7 +179,7 @@
     transition:font-size 0.3s cubic-bezier(0.4,0,0.2,1), margin 0.3s cubic-bezier(0.4,0,0.2,1);
   }
   .subhead{
-    color:#9aa3ab;
+    color:var(--paper-dim);
     font-size:0.92rem;
     line-height:1.5;
     max-width:38rem;
@@ -119,8 +232,8 @@
     margin-right:0.1rem;
   }
   .recent-tickers button{
-    background:#20242c;
-    border:1px solid #2e343e;
+    background:var(--input-bg);
+    border:1px solid var(--line);
     color:var(--paper-dim);
     font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
@@ -142,7 +255,7 @@
   .ticker-bar input{
     flex:1;
     background:var(--panel);
-    border:1px solid #333c44;
+    border:1px solid var(--line);
     color:var(--paper);
     font-family:'JetBrains Mono',monospace;
     font-size:0.95rem;
@@ -151,12 +264,12 @@
     letter-spacing:0.03em;
     transition:padding 0.3s cubic-bezier(0.4,0,0.2,1);
   }
-  .ticker-bar input::placeholder{color:#5c6670;}
+  .ticker-bar input::placeholder{color:var(--muted);}
   .ticker-bar input:focus{outline:none;border-color:var(--gold);}
   .ticker-bar button{
     background:transparent;
-    border:1px solid #3d4750;
-    color:#9aa3ab;
+    border:1px solid var(--line);
+    color:var(--paper-dim);
     font-family:'JetBrains Mono',monospace;
     font-size:0.78rem;
     padding:0.7rem 0.9rem;
@@ -171,20 +284,20 @@
   .progress-wrap{margin-top:1rem;transition:margin 0.3s cubic-bezier(0.4,0,0.2,1);}
   .progress-track{
     height:6px;
-    background:#232a30;
+    background:var(--track-bg);
     border-radius:3px;
     overflow:hidden;
   }
   .progress-fill{
     height:100%;
-    background:linear-gradient(90deg,var(--gold),#e8c98a);
+    background:linear-gradient(90deg,var(--gold),var(--gold-soft));
     width:0%;
     transition:width 0.35s ease;
   }
   .progress-label{
     font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
-    color:#7c8790;
+    color:var(--paper-dim);
     margin-top:0.4rem;
     display:flex;
     justify-content:space-between;
@@ -201,7 +314,7 @@
     overflow-x:auto;
     padding:1rem 1.4rem;
     background:var(--panel);
-    border-bottom:1px solid #2a3138;
+    border-bottom:1px solid var(--line);
     position:sticky;
     top:0;
     z-index:19;
@@ -212,33 +325,33 @@
     flex:0 0 auto;
     font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
-    color:#8b9399;
+    color:var(--paper-dim);
     text-decoration:none;
     padding:0.35rem 0.7rem;
-    border:1px solid #2f373e;
+    border:1px solid var(--line);
     border-radius:20px;
     white-space:nowrap;
   }
-  nav.jump a.done{color:var(--emerald-bright);border-color:#2e4a3c;}
+  nav.jump a.done{color:var(--emerald-bright);border-color:var(--good-border);}
 
   /* ---- Main ---- */
   main{max-width:38rem;margin:0 auto;padding:1.6rem 1.4rem 4rem;}
 
   .order-card{
     background:var(--panel);
-    border:1px solid #2a3138;
+    border:1px solid var(--line);
     border-radius:6px;
     padding:1.1rem 1.2rem;
     margin-bottom:2rem;
     font-size:0.85rem;
-    color:#a9b1b8;
+    color:var(--paper-dim);
     line-height:1.6;
   }
   .order-card b{color:var(--paper);}
 
   section.metric-section{
     margin-bottom:1.4rem;
-    border:1px solid #2a3138;
+    border:1px solid var(--line);
     border-radius:6px;
     overflow:hidden;
     background:var(--panel);
@@ -267,10 +380,10 @@
   .sec-count{
     font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
-    color:#6b7278;
+    color:var(--muted);
   }
   .chevron{
-    color:#5c6670;
+    color:var(--muted);
     transition:transform 0.2s ease;
     font-size:0.8rem;
   }
@@ -284,19 +397,19 @@
 
   .sec-desc{
     font-size:0.85rem;
-    color:#8b939a;
+    color:var(--paper-dim);
     margin:0 0 0.9rem;
     line-height:1.55;
     padding-bottom:0.9rem;
-    border-bottom:1px dashed #2a3138;
+    border-bottom:1px dashed var(--line);
   }
 
   .metric-row{
     display:flex;
     gap:0.7rem;
     align-items:flex-start;
-    padding:0.6rem 0;
-    border-bottom:1px solid #202730;
+    padding:0.75rem 0.8rem;
+    border-bottom:1px solid var(--border-soft);
   }
   .metric-row:last-child{border-bottom:none;}
   .metric-row input[type=checkbox]{
@@ -305,7 +418,7 @@
     height:1.15rem;
     flex:0 0 auto;
     margin-top:0.15rem;
-    border:1px solid #4a545c;
+    border:1px solid var(--line);
     border-radius:3px;
     background:var(--panel);
     cursor:pointer;
@@ -348,56 +461,77 @@
     margin-left:0.5rem;
     vertical-align:middle;
   }
-  .tier-badge.tier-core{background:#2e2016;color:#e0a85f;border:1px solid #4a3420;}
-  .tier-badge.tier-support{background:#1c2228;color:#7c8790;border:1px solid #2e343e;}
-  .tier-badge.tier-qual{background:#1a2028;color:#7a91b0;border:1px solid #2a3648;}
+  .tier-badge.tier-core{background:var(--tier-core-bg);color:var(--tier-core-text);border:1px solid var(--tier-core-border);}
+  .tier-badge.tier-support{background:var(--tier-support-bg);color:var(--tier-support-text);border:1px solid var(--tier-support-border);}
+  .tier-badge.tier-qual{background:var(--tier-qual-bg);color:var(--tier-qual-text);border:1px solid var(--tier-qual-border);}
 
   .calc-row{
     display:flex;
-    align-items:center;
-    gap:0.5rem;
-    margin-top:0.55rem;
+    align-items:stretch;
+    margin-top:0.7rem;
+    background:var(--input-bg);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    transition:border-color 0.2s ease;
   }
   .calc-label{
     font-family:'JetBrains Mono',monospace;
-    font-size:0.72rem;
+    font-size:0.7rem;
     color:var(--muted);
     white-space:nowrap;
+    padding:0.55rem 0.7rem;
+    display:flex;
+    align-items:center;
+    border-right:1px solid var(--line);
+    background:var(--input-label-bg);
   }
   .calc-input{
-    width:5.2rem;
-    background:#1c2228;
-    border:1px solid #333c44;
+    flex:1;
+    min-width:0;
+    background:transparent;
+    border:none;
     color:var(--paper);
     font-family:'JetBrains Mono',monospace;
-    font-size:0.82rem;
-    padding:0.3rem 0.5rem;
-    border-radius:3px;
+    font-size:0.88rem;
+    font-weight:500;
+    padding:0.55rem 0.6rem;
   }
-  .calc-input:focus{outline:none;border-color:var(--gold);}
-  .calc-input.pass{border-color:#5fcf94;color:#5fcf94;background:#132420;font-weight:600;}
-  .calc-input.fail{border-color:#e2776b;color:#e2776b;background:#251715;font-weight:600;}
+  .calc-input:focus{outline:none;background:var(--input-focus-bg);}
+  .calc-input.pass{color:var(--emerald-vivid);}
+  .calc-input.fail{color:var(--rust-vivid);}
   .calc-unit{
     font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
     color:var(--muted);
+    align-self:center;
+    padding-right:0.6rem;
+    white-space:nowrap;
   }
   .calc-hint{
     font-family:'JetBrains Mono',monospace;
-    font-size:0.7rem;
-    font-weight:600;
+    font-size:0.66rem;
+    font-weight:700;
+    letter-spacing:0.03em;
+    align-self:stretch;
+    display:flex;
+    align-items:center;
+    padding:0 0.7rem;
+    white-space:nowrap;
   }
-  .calc-hint.pass{color:#5fcf94;}
-  .calc-hint.fail{color:#e2776b;}
+  .calc-hint.pass{color:var(--pass-pill-text);background:var(--emerald-vivid);}
+  .calc-hint.fail{color:var(--fail-pill-text);background:var(--rust-vivid);}
+  .calc-row.pass{border-color:var(--emerald-vivid);}
+  .calc-row.fail{border-color:var(--rust-vivid);}
 
   .metric-desc{
     font-size:0.8rem;
-    color:#828b92;
+    color:var(--paper-dim);
     margin-top:0.15rem;
     line-height:1.5;
   }
   .metric-row.checked .metric-name{color:var(--gold);}
-  .metric-row.checked .metric-desc{color:#5c7268;}
+  .metric-row.checked .metric-desc{color:var(--emerald-bright);}
 
   .example-pair{
     display:flex;
@@ -413,33 +547,33 @@
     line-height:1.4;
   }
   .example-chip.good{
-    background:#1a2521;
+    background:var(--good-bg);
     color:var(--emerald-bright);
-    border:1px solid #2e4a3c;
+    border:1px solid var(--good-border);
   }
   .example-chip.bad{
-    background:#241a18;
-    color:#c07364;
-    border:1px solid #4a302b;
+    background:var(--bad-bg);
+    color:var(--rust-vivid);
+    border:1px solid var(--bad-border);
   }
   .example-chip b{font-weight:600;}
 
   .watchout{
     margin-top:0.9rem;
     padding:0.7rem 0.85rem;
-    background:#241b16;
+    background:var(--watch-bg);
     border-left:2px solid var(--amber);
     border-radius:3px;
     font-size:0.8rem;
-    color:#cbb488;
+    color:var(--watch-text);
     line-height:1.55;
   }
   .watchout b{color:var(--amber);}
 
   .gutcheck{
     margin-top:2rem;
-    background:#241f14;
-    border:1px solid #4a3f26;
+    background:var(--gutcheck-bg);
+    border:1px solid var(--gutcheck-border);
     border-radius:6px;
     padding:1.3rem 1.2rem;
   }
@@ -451,7 +585,7 @@
   }
   .gutcheck p{
     font-size:0.86rem;
-    color:#c9bd9e;
+    color:var(--watch-text);
     line-height:1.6;
     margin:0;
   }
@@ -460,7 +594,7 @@
     text-align:center;
     font-family:'JetBrains Mono',monospace;
     font-size:0.7rem;
-    color:#4c545c;
+    color:var(--footer-text);
     padding:1.6rem;
   }
 
@@ -474,7 +608,7 @@
   .export-btn{
     flex:1 1 8rem;
     background:var(--panel);
-    border:1px solid #2e3841;
+    border:1px solid var(--line);
     color:var(--paper);
     font-family:'JetBrains Mono',monospace;
     font-size:0.78rem;
@@ -487,13 +621,13 @@
   .export-hint{
     text-align:center;
     font-size:0.72rem;
-    color:#5c6670;
+    color:var(--muted);
     margin-top:0.5rem;
     font-family:'JetBrains Mono',monospace;
     transition:color 0.2s ease;
   }
-  .export-hint.pass{color:#5fcf94;font-weight:600;}
-  .export-hint.fail{color:#e2776b;font-weight:600;}
+  .export-hint.pass{color:var(--emerald-vivid);font-weight:600;}
+  .export-hint.fail{color:var(--rust-vivid);font-weight:600;}
 
   /* ---- Floating live-verdict badge ---- */
   .float-badge{
@@ -510,7 +644,7 @@
     gap:0.55rem;
     font-family:'JetBrains Mono',monospace;
     font-size:0.72rem;
-    box-shadow:0 4px 16px rgba(0,0,0,0.35);
+    box-shadow:0 4px 16px var(--shadow);
     opacity:0;
     transform:translateY(0.4rem);
     pointer-events:none;
@@ -567,7 +701,7 @@
       overflow-x:hidden;
       padding:2.4rem 1.2rem;
       border-bottom:none;
-      border-right:1px solid #2a3138;
+      border-right:1px solid var(--line);
       gap:0.3rem;
     }
     nav.jump a{
@@ -588,27 +722,41 @@
   }
 
   @media(min-width:1240px){
-    main{max-width:66rem;}
-    section.open .sec-body{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      column-gap:2.2rem;
-      align-items:start;
+    main{max-width:56rem;}
+    .metric-row{
+      box-sizing:border-box;
+      margin-bottom:0.7rem;
+      padding:0.9rem 1rem;
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-radius:7px;
     }
-    .sec-desc, .watchout{grid-column:1 / -1;}
-    .metric-row{padding:0.85rem 0;}
+    .metric-row:last-child{margin-bottom:0;border-bottom:1px solid var(--card-border);}
   }
 
   nav.jump a.active{
-    background:#241f14;
+    background:var(--nav-active-bg);
     border-color:var(--gold);
     color:var(--paper);
   }
 </style>
+<script>
+(function(){
+  try{
+    var stored = localStorage.getItem('stel:theme');
+    var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if(theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 
 <header>
+  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
   <div class="eyebrow">Stel · Stock Evaluation Ledger</div>
   <h1>Is this stock worth holding?</h1>
   <div class="subhead">Work through each section in order. Check off what the stock passes — the ledger tracks your read as you go and saves per ticker.</div>
@@ -664,16 +812,31 @@
 <footer>STEL · saved locally on this device, per ticker</footer>
 
 <script>
+// ---- Theme toggle ----
+const themeToggleBtn = document.getElementById('themeToggle');
+function applyTheme(theme){
+  if(theme === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  try{ localStorage.setItem('stel:theme', theme); }catch(e){}
+}
+themeToggleBtn.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  applyTheme(isLight ? 'dark' : 'light');
+});
+
 const DATA = [
   {
     title: "Valuation",
     desc: "Is the price reasonable for what you're getting? Always compare to industry peers, not the market average.",
     items: [
-      {n:"P/E ratio", t:"vs. industry peers", tier:"support", d:"Price vs. earnings. A low P/E alone isn't 'cheap' — it can mean the market expects declining earnings.", good:"P/E 15–20, in line with or below peers averaging 25", bad:"P/E 60+ while peers sit at 20, with no unusual growth to justify it", calc:{type:"max", value:25, unit:"x", label:"P/E"}},
-      {n:"PEG ratio", t:"< 1 attractive", tier:"support", d:"P/E adjusted for growth rate.", good:"P/E 18 ÷ 20% growth = PEG 0.9", bad:"P/E 40 ÷ 8% growth = PEG 5", calc:{type:"max", value:1, unit:"x", label:"PEG"}},
-      {n:"P/B ratio", t:"asset-heavy names", tier:"support", d:"Price vs. book value — most relevant for banks, industrials.", good:"P/B 1.5–3 for a profitable industrial or bank", bad:"P/B 8+ with mediocre ROE, i.e. paying a huge premium over net assets for average returns", calc:{type:"max", value:3, unit:"x", label:"P/B"}},
-      {n:"P/S ratio", t:"low/no-margin names", tier:"support", d:"Price vs. revenue — useful for early-growth companies.", good:"P/S 2–4 for a growing company with a credible path to profit", bad:"P/S 20+ with no profit and slowing revenue growth", calc:{type:"max", value:4, unit:"x", label:"P/S"}},
-      {n:"EV/EBITDA", t:"vs. peers", tier:"support", d:"Better than P/E when comparing companies with different debt loads.", good:"EV/EBITDA 8–12, near sector average", bad:"EV/EBITDA 25+ while carrying heavy debt", calc:{type:"max", value:12, unit:"x", label:"EV/EBITDA"}}
+      {n:"P/E ratio", t:"vs. industry peers", tier:"support", d:"Price vs. earnings. A low P/E alone isn't 'cheap' — it can mean the market expects declining earnings.", good:"P/E 15–20, in line with or below peers averaging 25", bad:"P/E 60+ while peers sit at 20, with no unusual growth to justify it", calc:{type:"max", value:25, unit:"", label:"P/E"}},
+      {n:"PEG ratio", t:"< 1 attractive", tier:"support", d:"P/E adjusted for growth rate.", good:"P/E 18 ÷ 20% growth = PEG 0.9", bad:"P/E 40 ÷ 8% growth = PEG 5", calc:{type:"max", value:1, unit:"", label:"PEG"}},
+      {n:"P/B ratio", t:"asset-heavy names", tier:"support", d:"Price vs. book value — most relevant for banks, industrials.", good:"P/B 1.5–3 for a profitable industrial or bank", bad:"P/B 8+ with mediocre ROE, i.e. paying a huge premium over net assets for average returns", calc:{type:"max", value:3, unit:"", label:"P/B"}},
+      {n:"P/S ratio", t:"low/no-margin names", tier:"support", d:"Price vs. revenue — useful for early-growth companies.", good:"P/S 2–4 for a growing company with a credible path to profit", bad:"P/S 20+ with no profit and slowing revenue growth", calc:{type:"max", value:4, unit:"", label:"P/S"}},
+      {n:"EV/EBITDA", t:"vs. peers", tier:"support", d:"Better than P/E when comparing companies with different debt loads.", good:"EV/EBITDA 8–12, near sector average", bad:"EV/EBITDA 25+ while carrying heavy debt", calc:{type:"max", value:12, unit:"", label:"EV/EBITDA"}}
     ],
     watch: "A low P/E isn't automatically cheap — pair valuation with the growth and quality checks below before drawing conclusions."
   },
@@ -704,9 +867,9 @@ const DATA = [
     title: "Financial Health",
     desc: "Can the company survive a downturn? This is often the first real filter — a fragile balance sheet can sink an otherwise good business.",
     items: [
-      {n:"Debt-to-equity", t:"low / manageable", tier:"core", d:"How leveraged the balance sheet is.", good:"D/E under 0.5, or under 1 for capital-intensive industries", bad:"D/E above 2 for a non-financial, non-utility company", calc:{type:"max", value:1, unit:"x", label:"D/E"}},
-      {n:"Current / quick ratio", t:"> 1", tier:"support", d:"Short-term liquidity — ability to cover near-term obligations.", good:"Current ratio 1.5–2.5", bad:"Current ratio under 1 — can't cover short-term liabilities with short-term assets", calc:{type:"min", value:1.5, unit:"x", label:"Current ratio"}},
-      {n:"Interest coverage", t:"comfortably high", tier:"core", d:"Operating income vs. interest expense. Low coverage = risk in a rate spike or earnings dip.", good:"Operating income covers interest expense 8x or more", bad:"Coverage under 2x — a bad quarter could mean missed interest payments", calc:{type:"min", value:8, unit:"x", label:"Interest coverage"}},
+      {n:"Debt-to-equity", t:"low / manageable", tier:"core", d:"How leveraged the balance sheet is.", good:"D/E under 0.5, or under 1 for capital-intensive industries", bad:"D/E above 2 for a non-financial, non-utility company", calc:{type:"max", value:1, unit:"", label:"D/E"}},
+      {n:"Current / quick ratio", t:"> 1", tier:"support", d:"Short-term liquidity — ability to cover near-term obligations.", good:"Current ratio 1.5–2.5", bad:"Current ratio under 1 — can't cover short-term liabilities with short-term assets", calc:{type:"min", value:1.5, unit:"", label:"Current ratio"}},
+      {n:"Interest coverage", t:"comfortably high", tier:"core", d:"Operating income vs. interest expense. Low coverage = risk in a rate spike or earnings dip.", good:"Operating income covers interest expense 8x or more", bad:"Coverage under 2x — a bad quarter could mean missed interest payments", calc:{type:"min", value:8, unit:"x coverage", label:"Interest coverage"}},
       {n:"Free cash flow", t:"consistently positive", tier:"core", d:"Actual cash generated — harder to manipulate than EPS.", good:"Positive FCF in 4 of the last 5 years, growing", bad:"Negative FCF most years despite reported accounting profit"}
     ],
     watch: "If it fails here, dig deeper before moving on — this is the section most likely to disqualify a stock outright."
@@ -783,7 +946,7 @@ DATA.forEach((sec, si) => {
           <div class="calc-row">
             <span class="calc-label">${it.calc.label}</span>
             <input type="number" step="any" class="calc-input" id="calc-${si}-${ii}" placeholder="value" inputmode="decimal">
-            <span class="calc-unit">${it.calc.unit}</span>
+            ${it.calc.unit ? `<span class="calc-unit">${it.calc.unit}</span>` : ''}
             <span class="calc-hint" id="calc-hint-${si}-${ii}"></span>
           </div>` : '';
     return `
@@ -872,9 +1035,11 @@ DATA.forEach((sec, si) => {
       }
     });
     input.addEventListener('input', () => {
+      const row = input.closest('.calc-row');
       const raw = input.value.trim();
       if(raw === ''){
         input.classList.remove('pass','fail');
+        row.classList.remove('pass','fail');
         hint.textContent = '';
         hint.classList.remove('pass','fail');
         saveState();
@@ -885,7 +1050,9 @@ DATA.forEach((sec, si) => {
       const passed = evalCalc(it.calc, num);
       input.classList.toggle('pass', passed);
       input.classList.toggle('fail', !passed);
-      hint.textContent = passed ? '✓ pass' : '✗ threshold missed';
+      row.classList.toggle('pass', passed);
+      row.classList.toggle('fail', !passed);
+      hint.textContent = passed ? 'PASS' : 'FAIL';
       hint.classList.toggle('pass', passed);
       hint.classList.toggle('fail', !passed);
       cb.checked = passed;
@@ -970,8 +1137,10 @@ function loadState(){
   allCalcIds.forEach(id => {
     const input = document.getElementById(id);
     const hint = document.getElementById('calc-hint-' + id.slice(5));
+    const row = input.closest('.calc-row');
     input.value = values[id] || '';
     input.classList.remove('pass','fail');
+    row.classList.remove('pass','fail');
     if(hint){ hint.textContent=''; hint.classList.remove('pass','fail'); }
     if(input.value !== ''){
       input.dispatchEvent(new Event('input'));
